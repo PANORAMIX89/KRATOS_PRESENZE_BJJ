@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      * { box-sizing: border-box; }
+      body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+      .container { width: 100%; max-width: 400px; margin: 20px 0; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+      
+      .logo-img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px; }
+      .logo-title { font-size: 28px; font-weight: 900; letter-spacing: 2px; color: #000000; margin-bottom: 5px; }
+      .logo-subtitle { font-size: 14px; font-weight: 600; color: #6c757d; letter-spacing: 1px; margin-bottom: 25px; }
+      .logo-subtitle-small { font-size: clamp(11px, 3vw, 14px); }
+      
+      .btn-main { width: 100%; padding: 18px; margin: 10px 0; font-size: 18px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+      .btn-old { background-color: #28a745; }
+      .btn-new { background-color: #0056b3; }
+      .btn-maestro { background-color: #212529; margin-top: 40px; }
+      .btn-back { background-color: #6c757d; padding: 12px; margin-top: 15px; width: 100%; border: none; border-radius: 8px; color: white; cursor: pointer; font-weight: bold;}
+      
+      input { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; text-transform: uppercase; }
+      
+      .hidden { display: none; }
+      .msg { font-weight: bold; margin-top: 20px; font-size: 16px; }
+      .success-photo { color: #28a745; font-weight: bold; margin: 10px 0; text-align: center; font-size: clamp(11px, 3.2vw, 14px); white-space: nowrap; }
+      .error { color: #dc3545; }
+      
+      /* Schermate Blocco Finale */
+      .blocco-finale { padding: 40px 20px; text-align: center; }
+      .blocco-finale h2 { font-size: clamp(13px, 4.2vw, 20px); margin-bottom: 15px; overflow-wrap: break-word; word-break: break-word; }
+      .blocco-finale p { color: #495057; font-size: 16px; line-height: 1.5; }
+      .text-ok { color: #28a745; }
+      .text-ko { color: #dc3545; }
+      .emoji-space { font-size: 48px; margin: 20px 0; }
+    </style>
+  </head>
+  <body>
+    
+    <div class="container" id="homeView">
+      <img class="logo-img" src="https://lh3.googleusercontent.com/d/1Rv2kxJ_uBZ1xejenGfzdZIyO8P8M79yg" alt="Kratos BJJ Logo">
+      <div class="logo-title">KRATOS</div>
+      <div class="logo-subtitle">BRAZILIAN JIU-JITSU</div>
+      <button class="btn-main btn-old" onclick="showView('oldView')">🥋 ACCESSO TATAMI 🥋</button>
+      <button class="btn-main btn-new" onclick="showView('newView')">📅 NUOVA ISCRIZIONE 📅</button>
+      
+      <button class="btn-main btn-maestro" onclick="vaiAllaDashboard()">🔒LOGIN🔒</button>
+    </div>
+
+    <div class="container hidden" id="newView">
+      <img class="logo-img" src="https://lh3.googleusercontent.com/d/1Rv2kxJ_uBZ1xejenGfzdZIyO8P8M79yg" alt="Kratos BJJ Logo">
+      <div class="logo-title">KRATOS</div>
+      <div class="logo-subtitle">NUOVA ISCRIZIONE</div>
+      
+      <!-- FIX: Due campi separati per Nome e Cognome -->
+      <input type="text" id="nuovoNome" placeholder="NOME">
+      <input type="text" id="nuovoCognome" placeholder="COGNOME">
+      
+      <input type="file" id="fotoSelfie" class="hidden" accept="image/*" capture="user" onchange="confermaFoto()">
+      <button class="btn-main btn-new" onclick="document.getElementById('fotoSelfie').click()">SCATTA SELFIE</button>
+      <div id="fotoStatus" class="success-photo hidden"> ✅ !FOTO ACQUISITA CON SUCCESSO! ✅</div>
+      <button class="btn-main btn-old" id="btnSalvaNuovo" onclick="salvaNuovo()">INVIA ISCRIZIONE</button>
+      <button class="btn-back" onclick="showView('homeView')">Annulla</button>
+      <div id="msgNew" class="msg"></div>
+    </div>
+
+    <div class="container hidden" id="oldView">
+      <img class="logo-img" src="https://lh3.googleusercontent.com/d/1Rv2kxJ_uBZ1xejenGfzdZIyO8P8M79yg" alt="Kratos BJJ Logo">
+      <div class="logo-title">KRATOS</div>
+      <div class="logo-subtitle logo-subtitle-small">RICHIESTA DI ACCESSO AL TATAMI</div>
+      <input list="listaAtleti" id="nomeAtleta" placeholder="CERCA IL TUO NOME...">
+      <datalist id="listaAtleti"></datalist>
+      <button class="btn-main btn-old" id="btnCheckin" onclick="avviaRegistrazione()">REGISTRA PRESENZA</button>
+      <button class="btn-back" onclick="showView('homeView')">Indietro</button>
+      <div id="msgOld" class="msg"></div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        google.script.run.withSuccessHandler(popolaTendina).getNomiAtleti();
+      });
+
+      function popolaTendina(nomi) {
+        const dataList = document.getElementById('listaAtleti');
+        if (!dataList) return;
+        dataList.innerHTML = "";
+        nomi.forEach(nome => {
+          const opt = document.createElement('option');
+          opt.value = nome;
+          dataList.appendChild(opt);
+        });
+      }
+
+      function showView(viewId) {
+        document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
+        document.getElementById(viewId).classList.remove('hidden');
+      }
+
+      function vaiAllaDashboard() {
+        document.body.innerHTML = "<div class='container msg'>Reindirizzamento all'Area Maestro...</div>";
+        google.script.run.withSuccessHandler(function(url) {
+          window.top.location.href = url + "?vista=maestro";
+        }).getAppUrl();
+      }
+
+      function tornaAllaHome() {
+        document.body.innerHTML = "<div class='container msg'> 🔄...Ricaricamento in corso...🔄</div>";
+        google.script.run.withSuccessHandler(function(url) {
+          window.top.location.href = url;
+        }).getAppUrl();
+      }
+
+      function confermaFoto() {
+        const fileInput = document.getElementById('fotoSelfie');
+        const fotoStatus = document.getElementById('fotoStatus');
+        if (fileInput.files.length > 0) {
+          fotoStatus.classList.remove('hidden');
+        }
+      }
+
+      function salvaNuovo() {
+        // FIX: Raccolta e validazione dei due campi separati
+        const nome = document.getElementById('nuovoNome').value.trim().toUpperCase();
+        const cognome = document.getElementById('nuovoCognome').value.trim().toUpperCase();
+        const fileInput = document.getElementById('fotoSelfie');
+        const msgDiv = document.getElementById('msgNew');
+        const btnInvia = document.getElementById('btnSalvaNuovo');
+        
+        if (!nome || !cognome || fileInput.files.length === 0) {
+          msgDiv.innerHTML = "<span class='error'>Nome, Cognome o selfie mancante!</span>";
+          return;
+        }
+
+        const nomeCompleto = nome + " " + cognome;
+
+        msgDiv.innerHTML = "Caricamento in corso...";
+        btnInvia.disabled = true;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          google.script.run.withSuccessHandler(res => {
+            if(res.success) {
+              document.body.innerHTML = `
+                <div class="container blocco-finale">
+                  <h2 class="text-ok">🥋REGISTRAZIONE AVVENUTA🥋</h2>
+                  <div class="emoji-space">🥋🔥✨</div>
+                  <p>I tuoi dati e il selfie sono stati salvati correttamente nel sistema</p>
+                  <p><strong>OSS!</strong> Buon allenamento sul tatami.</p>
+                </div>
+              `;
+            } else {
+              // Mostra il messaggio di errore per utente già registrato
+              msgDiv.innerHTML = "<span class='error'>" + res.message + "</span>";
+              btnInvia.disabled = false;
+            }
+          }).registraNuovoAtleta(nomeCompleto, e.target.result);
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      }
+
+      function avviaRegistrazione() {
+        const nome = document.getElementById('nomeAtleta').value.trim().toUpperCase();
+        const msgDiv = document.getElementById('msgOld');
+        const btnCheckin = document.getElementById('btnCheckin');
+        
+        if(!nome) {
+          msgDiv.innerHTML = "<span class='error'>Seleziona o inserisci il tuo nome!</span>";
+          return;
+        }
+
+        msgDiv.innerHTML = "Rilevamento posizione GPS in corso...";
+        btnCheckin.disabled = true;
+
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            google.script.run.withSuccessHandler(res => {
+              if(res.isOk) {
+                document.body.innerHTML = `
+                  <div class="container blocco-finale">
+                    <h2 class="text-ok">🥋ACCESSO CONFERMATO🥋</h2>
+                    <div class="emoji-space">⚔️👊🛡️</div>
+                    <p>Presenza registrata correttamente per l'atleta:<br><strong>${nome}</strong></p>
+                    <p><strong>OSS!</strong> Sali sul tatami e dai il massimo!</p>
+                  </div>
+                `;
+              } else if (res.notFound) {
+                document.body.innerHTML = `
+                  <div class="container blocco-finale">
+                    <h2 class="text-ko"> 🚨!ACCESSO NEGATO!🚨</h2>
+                    <div class="emoji-space">🚫🥋❌</div>
+                    <p>L'atleta <strong>${nome}</strong> non è presente nel database ufficiale</p>
+                    <p>Attenzione: Digita e seleziona il nome corretto dalla tendina suggerita</p>
+                    <button class="btn-main btn-maestro" onclick="tornaAllaHome()"> 🔄RIPROVA ACCESSO🔄</button>
+                  </div>
+                `;
+              } else {
+                document.body.innerHTML = `
+                  <div class="container blocco-finale">
+                    <h2 class="text-ko">ATTENZIONE! 🚨</h2>
+                    <div class="emoji-space">🗺️❌🛑</div>
+                    <p>Il sistema ha rilevato che sei fuori dal raggio della palestra.</p>
+                    <p>Il tentativo di check-in per <strong>${nome}</strong> è stato comunque registrato come <strong>FURBETTO</strong>.</p>
+                    <p>Avvisiamo il Maestro se si tratta di un errore GPS.</p>
+                  </div>
+                `;
+              }
+            }).registraPresenza(nome, pos.coords.latitude, pos.coords.longitude);
+          },
+          err => {
+            msgDiv.innerHTML = "<span class='error'>Errore GPS: Attiva la geolocalizzazione sul telefono e riprova.</span>";
+            btnCheckin.disabled = false;
+          },
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        );
+      }
+    </script>
+  </body>
+</html>
