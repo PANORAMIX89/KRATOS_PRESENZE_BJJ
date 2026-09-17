@@ -58,14 +58,34 @@
       <input type="text" id="nuovoNome" placeholder="NOME">
       <input type="text" id="nuovoCognome" placeholder="COGNOME">
       
-      <select id="nuovaCintura">
-        <option value="" disabled selected>SELEZIONA CINTURA</option>
-        <option value="BIANCA">BIANCA</option>
-        <option value="BLU">BLU</option>
-        <option value="VIOLA">VIOLA</option>
-        <option value="MARRONE">MARRONE</option>
-        <option value="NERA">NERA</option>
-      </select>
+        <div id="cinturaSelectorContainer" style="position:relative; margin:10px 0;">
+            <div id="selectedBeltVisual" onclick="toggleBeltDropdown()" style="width:100%; padding:15px; border:1px solid #4b5563; border-radius:8px; background-color:#374151; color:white; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+               <div style="display:flex; align-items:center;">
+                  <span style="display:inline-block; width:30px; height:12px; border-radius:2px; background-color:#ffffff; margin-right:10px; border:1px solid #000;"></span>
+                  <span>BIANCA</span>
+               </div>
+               <span style="font-size:12px;">▼</span>
+            </div>
+            <input type="hidden" id="nuovaCintura" value="BIANCA">
+            
+            <div id="beltDropdown" style="display:none; position:absolute; top:100%; left:0; width:100%; background-color:#1f2937; border:1px solid #4b5563; border-radius:8px; z-index:10; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.5); margin-top:5px;">
+               <div class="belt-option" onclick="selectBelt('BIANCA', '#ffffff')" style="padding:15px; display:flex; align-items:center; cursor:pointer; border-bottom:1px solid #374151;">
+                  <span style="display:inline-block; width:30px; height:12px; border-radius:2px; background-color:#ffffff; margin-right:10px; border:1px solid #000;"></span> BIANCA
+               </div>
+               <div class="belt-option" onclick="selectBelt('BLU', '#2563eb')" style="padding:15px; display:flex; align-items:center; cursor:pointer; border-bottom:1px solid #374151;">
+                  <span style="display:inline-block; width:30px; height:12px; border-radius:2px; background-color:#2563eb; margin-right:10px; border:1px solid #000;"></span> BLU
+               </div>
+               <div class="belt-option" onclick="selectBelt('VIOLA', '#7c3aed')" style="padding:15px; display:flex; align-items:center; cursor:pointer; border-bottom:1px solid #374151;">
+                  <span style="display:inline-block; width:30px; height:12px; border-radius:2px; background-color:#7c3aed; margin-right:10px; border:1px solid #000;"></span> VIOLA
+               </div>
+               <div class="belt-option" onclick="selectBelt('MARRONE', '#78350f')" style="padding:15px; display:flex; align-items:center; cursor:pointer; border-bottom:1px solid #374151;">
+                  <span style="display:inline-block; width:30px; height:12px; border-radius:2px; background-color:#78350f; margin-right:10px; border:1px solid #000;"></span> MARRONE
+               </div>
+               <div class="belt-option" onclick="selectBelt('NERA', '#000000')" style="padding:15px; display:flex; align-items:center; cursor:pointer;">
+                  <span style="display:inline-block; width:30px; height:12px; border-radius:2px; background-color:#000000; margin-right:10px; border:1px solid #555;"></span> NERA
+               </div>
+            </div>
+        </div>
       
       <input type="file" id="fotoSelfie" class="hidden" accept="image/*" capture="user" onchange="confermaFoto()">
       <button class="btn-main btn-new" onclick="document.getElementById('fotoSelfie').click()">📸 SCATTA SELFIE</button>
