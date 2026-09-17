@@ -471,7 +471,7 @@
             caricaDatiGiorno(); 
             avviaPolling();
           } else {
-            alert("PIN errato. Riprova.");
+            document.getElementById('loginError').innerText = "PIN errato. Riprova.";
             btn.innerText = "Accedi";
             document.getElementById('pinInput').value = "";
           }
