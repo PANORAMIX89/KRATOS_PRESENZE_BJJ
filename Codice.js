@@ -526,3 +526,46 @@ function getStoricoCinture() {
   }
   return storico;
 }
+function getAnagraficaAtleta(nome) {
+  const ss = SpreadsheetApp.openById(ID_FOGLIO);
+  
+  // 1. Statistiche Presenze (dal REGISTRO GREZZO)
+  const foglioRegistro = ss.getSheetByName("REGISTRO GREZZO");
+  const datiRegistro = foglioRegistro.getDataRange().getValues();
+  let totPresenze = 0;
+  for (let i = 1; i < datiRegistro.length; i++) {
+    if (datiRegistro[i][3] && datiRegistro[i][3].toString().toUpperCase() === nome.toUpperCase()) {
+      if (datiRegistro[i][4] && datiRegistro[i][4].toString().startsWith("OK REGISTRAZIONE")) {
+        totPresenze++;
+      }
+    }
+  }
+  
+  // 2. Timeline Storico (da STORICO CINTURE)
+  const foglioStorico = ss.getSheetByName("STORICO CINTURE");
+  const storico = [];
+  if (foglioStorico) {
+    const datiStorico = foglioStorico.getDataRange().getValues();
+    for (let i = 3; i < datiStorico.length; i++) {
+      if (datiStorico[i][0] && datiStorico[i][0].toString().toUpperCase() === nome.toUpperCase()) {
+        let dataPulita = datiStorico[i][1];
+        if (dataPulita instanceof Date) {
+          dataPulita = Utilities.formatDate(dataPulita, Session.getScriptTimeZone(), "dd/MM/yyyy");
+        } else {
+          dataPulita = dataPulita.toString();
+        }
+        storico.push({
+          data: dataPulita,
+          cintura: datiStorico[i][2].toString(),
+          evento: datiStorico[i][3].toString(),
+          note: datiStorico[i][4] ? datiStorico[i][4].toString() : ""
+        });
+      }
+    }
+  }
+  
+  return {
+    presenzeTotali: totPresenze,
+    storico: storico
+  };
+}

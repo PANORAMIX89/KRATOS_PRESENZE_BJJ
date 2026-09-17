@@ -252,6 +252,28 @@
       </div>
     </div>
 
+    
+    <div id="modalAnagrafica" class="modal" style="display:none; justify-content:center; align-items:center; overflow-y:auto;">
+      <div class="modal-content" style="background:#1f2937; padding:20px; width:90%; max-width:400px; border: 2px solid #f97316; border-radius:12px; position:relative;">
+         <span onclick="chiudiAnagrafica()" style="position:absolute; top:10px; right:15px; color:#fff; font-size:24px; cursor:pointer;">&times;</span>
+         <div style="text-align:center; margin-bottom:15px;">
+            <img id="anagraficaImg" src="" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid #f97316; margin-bottom:10px; display:none;">
+            <h2 id="anagraficaNome" style="color:white; margin:0; font-size:20px;"></h2>
+            <div id="anagraficaCinturaContainer" style="margin-top:5px;"></div>
+         </div>
+         
+         <div style="background:#374151; padding:15px; border-radius:8px; margin-bottom:15px; text-align:center;">
+            <div style="font-size:14px; color:#9ca3af;">PRESENZE TOTALI SUL TATAMI</div>
+            <div id="anagraficaPresenze" style="font-size:32px; font-weight:bold; color:#f97316; margin-top:5px;">...</div>
+         </div>
+         
+         <h3 style="color:white; font-size:16px; border-bottom:1px solid #4b5563; padding-bottom:5px;">Timeline Cinture</h3>
+         <div id="anagraficaTimeline" style="color:#d1d5db; font-size:14px; margin-top:10px;">
+            <div class="loader-container"><div class="loader"></div></div>
+         </div>
+      </div>
+    </div>
+
     <div id="modalZoom" class="modal" onclick="chiudiModal()">
       <img id="zoomImg" class="modal-content" src="">
       <div id="zoomNome" class="modal-text"></div>
@@ -350,6 +372,51 @@
            document.getElementById('btnTab3').classList.add('active');
            renderizzaListaPromo(databaseAtletiGlobale);
         }
+      }
+
+      
+      function apriAnagrafica(fotoUrl, nome, cintura) {
+         document.getElementById('anagraficaNome').innerText = nome;
+         
+         if(fotoUrl) {
+            document.getElementById('anagraficaImg').src = fotoUrl;
+            document.getElementById('anagraficaImg').style.display = 'inline-block';
+         } else {
+            document.getElementById('anagraficaImg').style.display = 'none';
+         }
+         
+         document.getElementById('anagraficaCinturaContainer').innerHTML = "CINTURA ATTUALE: " + getBeltHtml(cintura);
+         document.getElementById('anagraficaPresenze').innerText = "...";
+         document.getElementById('anagraficaTimeline').innerHTML = '<div class="loader-container"><div class="loader"></div></div>';
+         
+         document.getElementById('modalAnagrafica').style.display = 'flex';
+         
+         google.script.run.withSuccessHandler(res => {
+            document.getElementById('anagraficaPresenze').innerText = res.presenzeTotali;
+            
+            let timelineHtml = "";
+            if(res.storico && res.storico.length > 0) {
+               res.storico.reverse().forEach(ev => {
+                  timelineHtml += `
+                     <div style="display:flex; margin-bottom:10px; align-items:center; background:#4b5563; padding:8px; border-radius:6px;">
+                        <div style="margin-right:10px;">${getBeltHtml(ev.cintura)}</div>
+                        <div style="flex-grow:1;">
+                           <div style="font-weight:bold; color:white;">${ev.cintura} <span style="font-size:11px; font-weight:normal; color:#f97316;">(${ev.evento})</span></div>
+                           <div style="font-size:12px;">${ev.data} ${ev.note ? ' - <i>'+ev.note+'</i>' : ''}</div>
+                        </div>
+                     </div>
+                  `;
+               });
+            } else {
+               timelineHtml = "<div>Nessuno storico presente per questo atleta.</div>";
+            }
+            document.getElementById('anagraficaTimeline').innerHTML = timelineHtml;
+            
+         }).getAnagraficaAtleta(nome);
+      }
+      
+      function chiudiAnagrafica() {
+         document.getElementById('modalAnagrafica').style.display = 'none';
       }
 
       function apriModal(url, nome) {
@@ -457,7 +524,7 @@
           li.className = 'atleta-item';
           
           let iniziali = (atleta.nome.split(' ').map(n=>n[0]).join('')).substring(0,2);
-          let avatarHtml = atleta.fotoUrl ? `<img src="${atleta.fotoUrl}" class="avatar-rect" onclick="apriModal('${atleta.fotoUrl}', '${atleta.nome}')">` : `<div class="avatar">${iniziali}</div>`;
+          let avatarHtml = atleta.fotoUrl ? `<img src="${atleta.fotoUrl}" class="avatar-rect" onclick="apriAnagrafica('${atleta.fotoUrl}', '${atleta.nome}', '${atleta.cintura}')">` : `<div class="avatar">${iniziali}</div>`;
           
           li.innerHTML = `
               <div class="atleta-info-wrapper">
