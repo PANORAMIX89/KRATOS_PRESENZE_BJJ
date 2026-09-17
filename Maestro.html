@@ -667,7 +667,7 @@
             storico.forEach(r => {
                html += `<tr><td>${r.data}</td><td>${r.nome}</td><td>${r.evento}</td><td>${r.cintura}</td><td>${r.note}</td></tr>`;
             });
-            html += "</table><script>window.print();</script></body></html>";
+            html += "</table><script>window.print();<\\/script></body></html>";
             
             let printWindow = window.open('', '_blank');
             printWindow.document.write(html);
