@@ -7,60 +7,86 @@
       /* FIX: Costringe il browser a calcolare correttamente i padding, evitando decentramenti */
       * { box-sizing: border-box; }
       
-      body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #ffffff; color: #000000; }
+      body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #111827; color: #ffffff; }
 
       /* STRUTTURA FISSA HEADER (Centraggio Matematico Assoluto) */
-      .header-fisso { background: #fff; padding: 15px; text-align: center; border-bottom: 2px solid #000; }
+      .header-fisso { background: #1f2937; padding: 15px; text-align: center; border-bottom: 2px solid #f97316; }
       .img-container { position: relative; display: inline-block; width: 110px; height: 165px; margin: 0 auto; }
       .logo-palestra { width: 100px; height: 100px; border-radius: 50%; border: 2px solid #000; object-fit: cover; position: absolute; top: 0; left: 5px; z-index: 1; }
-      .foto-maestro { width: 110px; height: 110px; border-radius: 50%; border: 4px solid #000; object-fit: cover; box-shadow: 0px 4px 10px rgba(0,0,0,0.2); position: absolute; top: 55px; left: 0; z-index: 2; }
+      .foto-maestro { width: 110px; height: 110px; border-radius: 50%; border: 4px solid #f97316; object-fit: cover; box-shadow: 0px 4px 10px rgba(0,0,0,0.2); position: absolute; top: 55px; left: 0; z-index: 2; }
 
       /* STILI FOTO LISTA */
-      .avatar-rect { width: 45px; height: 45px; border: 2px solid black; object-fit: cover; margin-right: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; background-color: #eee; flex-shrink: 0; }
-      .avatar { width: 45px; height: 45px; border-radius: 50%; background-color: #e0e0e0; object-fit: cover; margin-right: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #666; flex-shrink: 0; }
+      .avatar-rect { width: 35px; height: 35px; border: 1px solid black; object-fit: cover; margin-right: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; background-color: #4b5563; color: white; flex-shrink: 0; }
+      .avatar { width: 35px; height: 35px; border-radius: 50%; background-color: #4b5563; color: white; object-fit: cover; margin-right: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #9ca3af; flex-shrink: 0; }
 
       /* LOGIN */
-      #loginView { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; width: 100%; padding: 20px; background-color: #f4f4f9; }
-      .login-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 320px; }
-      .pin-input { width: 100%; padding: 15px; margin: 20px 0; font-size: 24px; text-align: center; letter-spacing: 5px; border: 1px solid #ccc; border-radius: 8px; }
+      #loginView { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; width: 100%; padding: 20px; background-color: #111827; }
+      .login-box { background: #1f2937; color: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 320px; }
+      .pin-input { width: 100%; padding: 15px; margin: 20px 0; font-size: 24px; text-align: center; letter-spacing: 5px; border: 1px solid #4b5563; background-color: #374151; color: white; border-radius: 8px; }
       
       /* PULSANTI E INPUT */
-      .btn-login { width: 100%; padding: 15px; background-color: #000; color: #fff; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
-      .btn-reset { width: 100%; padding: 15px; background-color: #666; color: #fff; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
-      .date-picker { padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; width: 100%; box-sizing: border-box; background-color: #fff; text-transform: uppercase; }
+      .btn-login { width: 100%; padding: 15px; background-color: #f97316; color: #fff; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
+      .btn-reset { width: 100%; padding: 15px; background-color: #9ca3af; color: #fff; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
+      .date-picker { padding: 6px; border: 1px solid #4b5563; background-color: #374151; color: white; border-radius: 5px; font-size: 14px; width: 100%; box-sizing: border-box; background-color: #fff; text-transform: uppercase; }
+      .mesi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #1f2937; padding: 15px; border: 1px solid #4b5563; background-color: #374151; color: white; border-radius: 5px; }
+      .mesi-grid label { display: flex; align-items: center; gap: 5px; font-size: 14px; cursor: pointer; }
+      .mesi-grid input[type="checkbox"] { width: 18px; height: 18px; accent-color: #000; cursor: pointer; }
+
+      
+      .belt-icon { display: inline-block; width: 14px; height: 14px; border-radius: 3px; margin-left: 8px; vertical-align: middle; border: 1px solid #000; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+      .belt-BIANCA { background-color: #ffffff; }
+      .belt-BLU { background-color: #2563eb; }
+      .belt-VIOLA { background-color: #7c3aed; }
+      .belt-MARRONE { background-color: #78350f; }
+      .belt-NERA { background-color: #000000; border: 1px solid #555; }
 
       /* DASHBOARD */
       #dashboardView { max-width: 500px; margin: auto; padding: 10px; }
-      .tabs { display: flex; margin-bottom: 20px; gap: 5px; margin-top: 10px; }
-      .tab-btn { flex: 1; padding: 12px; background: #eee; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; font-size: 12px;}
-      .tab-btn.active { background: #000; color: #fff; }
+      .tabs { display: flex; margin-bottom: 10px; gap: 5px; margin-top: 5px; }
+      .tab-btn { flex: 1; padding: 8px; background: #374151; color: white; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; font-size: 12px;}
+      .tab-btn.active { background: #f97316; color: #fff; }
       
-      .vista-tab { padding-top: 10px; }
-      .header-dash { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
-      .header-dash h2 { margin: 0; font-size: 22px; }
+      .vista-tab { padding-top: 5px; }
+      .header-dash { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #eee; }
+      .header-dash h2 { margin: 0; font-size: 18px; }
 
-      .section-title { display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: bold; margin-top: 25px; margin-bottom: 15px; }
-      .count-badge { font-size: 14px; color: #666; font-weight: normal; }
-      .totale-box { background-color: #f8f9fa; border: 1px solid #ddd; padding: 10px; text-align: center; font-weight: bold; border-radius: 8px; margin-bottom: 15px; font-size: 16px;}
+      .section-title { display: flex; justify-content: space-between; align-items: center; font-size: 16px; font-weight: bold; margin-top: 15px; margin-bottom: 8px; }
+      .count-badge { font-size: 14px; color: #9ca3af; font-weight: normal; }
+      .totale-box { background-color: #374151; color: white; border-color: #4b5563; border: 1px solid #ddd; padding: 10px; text-align: center; font-weight: bold; border-radius: 8px; margin-bottom: 15px; font-size: 16px;}
 
       /* LISTE E RIGHE */
       .lista { list-style: none; padding: 0; margin: 0; }
-      .atleta-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; justify-content: space-between; }
+      .atleta-item { display: flex; align-items: center; padding: 6px 0; border-bottom: 1px solid #374151; justify-content: space-between; }
       .atleta-info-wrapper { display: flex; align-items: center; flex-grow: 1; overflow: hidden; }
       .atleta-nome { display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
-      .atleta-nome strong { font-size: 16px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .atleta-nome strong { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       .status-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: bold; flex-shrink: 0; margin-left: 10px; }
       .icon-ok { background-color: #1a1a1a; }
       .icon-ko { background-color: #dc3545; }
-      .data-iscrizione { font-size: 14px; color: #666; font-weight: bold; white-space: nowrap; flex-shrink: 0; margin-left: 10px; }
+      .data-iscrizione { font-size: 13px; color: #9ca3af; font-weight: bold; white-space: nowrap; flex-shrink: 0; margin-left: 5px; }
 
       /* MODAL E SPINNER */
       .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; flex-direction: column; }
       .modal-content { max-width: 90%; max-height: 70%; border-radius: 8px; border: 3px solid white; }
       .modal-text { color: white; margin-top: 15px; font-size: 20px; font-weight: bold; }
+      
+      .checkbox-appello { width: 22px; height: 22px; cursor: pointer; accent-color: #000; flex-shrink: 0; margin-left: 8px; }
+      
+      .btn-ufficializza { width: 100%; padding: 12px; margin-top: 15px; font-size: 18px; font-weight: 900; color: white; background: linear-gradient(135deg, #d35400, #e67e22); border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 10px rgba(211,84,0,0.4); text-transform: uppercase; transition: transform 0.2s; }
+      .btn-ufficializza:active { transform: scale(0.95); }
+      .btn-modifica-appello { width: 100%; padding: 10px; margin-top: 15px; font-size: 14px; font-weight: bold; color: #d35400; background: transparent; border: 2px solid #d35400; border-radius: 8px; cursor: pointer; }
 
       .hidden { display: none !important; }
       .error-msg { color: #dc3545; font-size: 14px; margin-top: 10px; }
+      
+      .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+      .modal-content { background: #1f2937; color: white; padding: 25px; border-radius: 12px; max-width: 90%; width: 350px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
+      .modal-content h3 { color: #d35400; margin-top: 0; font-size: 22px; }
+      .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+      .modal-buttons button { flex: 1; padding: 12px; margin: 0; font-size: 16px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; }
+      .btn-annulla-modal { background: #6c757d; color: white; }
+      .btn-conferma-modal { background: #d35400; color: white; }
+
       .check-svg { width: 14px; fill: white; }
 
       .loader-container { display: flex; justify-content: center; padding: 20px; }
@@ -71,30 +97,31 @@
   <body>
 
     <div id="loginView">
-      <div class="login-box">
-        <h2>Area Maestro</h2>
-        <input type="password" id="pinInput" class="pin-input" placeholder="••••" maxlength="4" pattern="[0-9]*" inputmode="numeric">
-        <button class="btn-login" id="btnLogin" onclick="effettuaLogin()">Accedi</button>
-        <div id="loginError" class="error-msg"></div>
+      <img src="https://lh3.googleusercontent.com/d/1-wRsEAvdsK5BGbBoeZlPIqi4SqIDcHrL" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #d35400; margin: 0 auto 20px auto; display: block;" alt="Maestro">
+      <div class="header-dash" style="justify-content:center;">
+        <h2>AREA MAESTRO</h2>
       </div>
+      <input type="password" id="pinInput" class="pin-input" placeholder="••••" maxlength="4" pattern="[0-9]*" inputmode="numeric">
+      <button class="btn-login" id="btnLogin" onclick="effettuaLogin()">Accedi</button>
+      <div id="loginError" class="error-msg"></div>
     </div>
 
     <div id="dashboardView" class="hidden">
       
-      <div class="header-fisso">
-        <div class="img-container">
-          <img src="https://lh3.googleusercontent.com/d/1-wRsEAvdsK5BGbBoeZlPIqi4SqIDcHrL" class="foto-maestro">
-        </div>
-        <h2 style="margin-top: 15px; margin-bottom: 0px; font-size: 20px;">🤙 DASHBOARD MAESTRO 🦍</h2>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+        <h1 style="margin:0; font-size: 24px;">Dashboard Maestro</h1>
+        <button class="btn-reset" style="padding: 10px 15px; width: auto; font-size: 14px;" onclick="esci()">Esci</button>
+        <button class="tab-btn" id="btnTab3" onclick="cambiaTab('vistaPromozioni')">PROMO</button>
       </div>
       
       <div class="tabs">
-        <button class="tab-btn active" id="btnTab0" onclick="cambiaTab('vistaAtleti')">ATLETI</button>
-        <button class="tab-btn" id="btnTab1" onclick="cambiaTab('vistaGiornaliera')">GIORNALIERA</button>
-        <button class="tab-btn" id="btnTab2" onclick="cambiaTab('vistaAnnuale')">ANNUALE</button>
+        <button class="tab-btn active" id="btnTab1" onclick="cambiaTab('vistaGiornaliera')">GIORNALIERA</button>
+        <button class="tab-btn" id="btnTab0" onclick="cambiaTab('vistaAtleti')">ATLETI</button>
+        <button class="tab-btn" id="btnTab2" onclick="cambiaTab('vistaAnnuale')">STATISTICHE</button>
+        <button class="tab-btn" id="btnTab3" onclick="cambiaTab('vistaPromozioni')">PROMO</button>
       </div>
 
-      <div id="vistaAtleti" class="vista-tab">
+      <div id="vistaAtleti" class="vista-tab hidden">
         <div class="header-dash">
           <h2>Anagrafica Iscritti</h2>
         </div>
@@ -110,7 +137,7 @@
         </div>
       </div>
 
-      <div id="vistaGiornaliera" class="vista-tab hidden">
+      <div id="vistaGiornaliera" class="vista-tab">
         <div class="header-dash">
           <h2>Presenze Tatami</h2>
           <input type="date" id="dataFiltro" class="date-picker" style="width: auto;" onchange="caricaDatiGiorno()">
@@ -119,11 +146,34 @@
         <div id="loadingDash" class="loader-container"><div class="loader"></div></div>
         
         <div id="contenutoDash" class="hidden">
-          <div class="section-title"><span>Partecipanti</span><span class="count-badge" id="countPartecipanti">0</span></div>
+          
+          <div id="sezioneAppello">
+            <div class="section-title" style="color: #d35400;"><span>APPELLO (In Attesa)</span><span class="count-badge" id="countInAttesa">0</span></div>
+            <ul class="lista" id="listaInAttesa"></ul>
+            <button class="btn-ufficializza" id="btnUfficializza" onclick="ufficializzaClasse()">✅ UFFICIALIZZA CLASSE</button>
+          </div>
+
+          <div class="section-title" style="margin-top: 20px;"><span>Partecipanti Confermati</span><span class="count-badge" id="countPartecipanti">0</span></div>
           <ul class="lista" id="listaPartecipanti"></ul>
           
-          <div class="section-title" style="margin-top: 40px; color: #dc3545;"><span>Furbetti (Fuori Area)</span><span class="count-badge" id="countFurbetti">0</span></div>
+          <div class="section-title" style="margin-top: 20px; color: #dc3545;"><span>Furbetti (Assenti)</span><span class="count-badge" id="countFurbetti">0</span></div>
           <ul class="lista" id="listaFurbetti"></ul>
+
+          <div id="sezioneModifica" class="hidden">
+             <button class="btn-modifica-appello" id="btnModifica" onclick="mostraModalRiapertura()">🔄 MODIFICA APPELLO DI OGGI</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL CONFERMA RIAPERTURA CLASSE -->
+      <div id="modalConfermaRiapertura" class="modal-overlay hidden">
+        <div class="modal-content">
+          <h3>⚠️ ATTENZIONE</h3>
+          <p>Vuoi riaprire la classe di questa giornata?<br><br>Tutti gli atleti torneranno nell'<strong>Appello In Attesa</strong> permettendoti di rifare le spunte.</p>
+          <div class="modal-buttons">
+            <button class="btn-annulla-modal" onclick="chiudiModalRiapertura()">Annulla</button>
+            <button class="btn-conferma-modal" onclick="confermaRiapertura()">Sì, Riapri Classe</button>
+          </div>
         </div>
       </div>
 
@@ -134,21 +184,20 @@
           <select id="annoFiltro" class="date-picker">
           </select>
           
-          <select id="meseFiltro" class="date-picker">
-            <option value="">Tutti i mesi</option>
-            <option value="1">Gennaio</option>
-            <option value="2">Febbraio</option>
-            <option value="3">Marzo</option>
-            <option value="4">Aprile</option>
-            <option value="5">Maggio</option>
-            <option value="6">Giugno</option>
-            <option value="7">Luglio</option>
-            <option value="8">Agosto</option>
-            <option value="9">Settembre</option>
-            <option value="10">Ottobre</option>
-            <option value="11">Novembre</option>
-            <option value="12">Dicembre</option>
-          </select>
+          <div class="mesi-grid" id="meseFiltroContainer">
+            <label><input type="checkbox" value="1" class="mese-cb"> Gennaio</label>
+            <label><input type="checkbox" value="2" class="mese-cb"> Febbraio</label>
+            <label><input type="checkbox" value="3" class="mese-cb"> Marzo</label>
+            <label><input type="checkbox" value="4" class="mese-cb"> Aprile</label>
+            <label><input type="checkbox" value="5" class="mese-cb"> Maggio</label>
+            <label><input type="checkbox" value="6" class="mese-cb"> Giugno</label>
+            <label><input type="checkbox" value="7" class="mese-cb"> Luglio</label>
+            <label><input type="checkbox" value="8" class="mese-cb"> Agosto</label>
+            <label><input type="checkbox" value="9" class="mese-cb"> Settembre</label>
+            <label><input type="checkbox" value="10" class="mese-cb"> Ottobre</label>
+            <label><input type="checkbox" value="11" class="mese-cb"> Novembre</label>
+            <label><input type="checkbox" value="12" class="mese-cb"> Dicembre</label>
+          </div>
 
           <input list="listaAtletiMaestro" id="atletaFiltro" class="date-picker" placeholder="CERCA ATLETA (Lascia vuoto per Tutti)">
           <datalist id="listaAtletiMaestro"></datalist>
@@ -166,6 +215,43 @@
       </div>
     </div>
 
+    
+      <div id="vistaPromozioni" class="vista-tab hidden">
+        <div class="header-dash">
+          <h2>Gestione Promozioni</h2>
+        </div>
+        <div style="margin-bottom: 20px;">
+          <input type="text" id="ricercaPromoLibera" class="date-picker" placeholder="CERCA ATLETA..." onkeyup="filtraPromoLista()">
+          <select id="filtroCinturaPromo" class="date-picker" onchange="filtraPromoLista()" style="margin-top:10px;">
+             <option value="">TUTTE LE CINTURE</option>
+             <option value="BIANCA">BIANCA</option>
+             <option value="BLU">BLU</option>
+             <option value="VIOLA">VIOLA</option>
+             <option value="MARRONE">MARRONE</option>
+             <option value="NERA">NERA</option>
+          </select>
+        </div>
+        
+        <div id="loadingPromo" class="loader-container hidden"><div class="loader"></div></div>
+        
+        <div id="contenutoPromo">
+           <div class="section-title"><span>Atleti Selezionabili</span><span class="count-badge" id="countPromoAtleti">0</span></div>
+           <ul class="lista" id="listaPromoAtleti"></ul>
+           <button class="btn-login" style="margin-top:20px;" onclick="apriModalPromo()">ASSEGNA NUOVA CINTURA</button>
+           <button class="btn-reset" style="margin-top:10px;" onclick="stampaReportPromo()">SCARICA REPORT STORICO</button>
+        </div>
+      </div>
+
+    
+    <div id="modalPromo" class="modal" style="display:none; justify-content:flex-start; overflow-y:auto; padding-top:40px;">
+      <div class="modal-content" style="background:#1f2937; padding:20px; width:90%; max-width:500px; border: 2px solid #f97316;">
+         <h2 style="color:white; text-align:center; margin-top:0;">CONFERMA PROMOZIONI</h2>
+         <div id="listaSelezionatiPromo" style="margin-bottom:20px;"></div>
+         <button class="btn-login" onclick="confermaPromozioni()">CONFERMA E SALVA</button>
+         <button class="btn-reset" style="margin-top:10px;" onclick="chiudiModalPromo()">ANNULLA</button>
+      </div>
+    </div>
+
     <div id="modalZoom" class="modal" onclick="chiudiModal()">
       <img id="zoomImg" class="modal-content" src="">
       <div id="zoomNome" class="modal-text"></div>
@@ -178,6 +264,16 @@
         const tzOffset = (new Date()).getTimezoneOffset() * 60000; 
         const dataLocal = (new Date(Date.now() - tzOffset)).toISOString().split("T")[0];
         document.getElementById('dataFiltro').value = dataLocal;
+        
+        const isAuth = localStorage.getItem('kratos_maestro_auth');
+        if (isAuth === "OK") {
+          document.getElementById('loginView').classList.add('hidden');
+          document.getElementById('dashboardView').classList.remove('hidden');
+          cambiaTab('vistaGiornaliera');
+          inizializzaDatiAtleti(); 
+          caricaDatiGiorno(); 
+          avviaPolling();
+        }
         
         google.script.run.withSuccessHandler(popolaTendinaAnni).getAnniTendina();
       });
@@ -249,7 +345,11 @@
         
         if(tabId === 'vistaAtleti') document.getElementById('btnTab0').classList.add('active');
         else if(tabId === 'vistaGiornaliera') document.getElementById('btnTab1').classList.add('active');
-        else document.getElementById('btnTab2').classList.add('active');
+        else if(tabId === 'vistaAnnuale') document.getElementById('btnTab2').classList.add('active');
+        else if(tabId === 'vistaPromozioni') {
+           document.getElementById('btnTab3').classList.add('active');
+           renderizzaListaPromo(databaseAtletiGlobale);
+        }
       }
 
       function apriModal(url, nome) {
@@ -273,7 +373,7 @@
           document.getElementById('annoFiltro').selectedIndex = 0;
         }
 
-        document.getElementById('meseFiltro').value = "";
+        document.querySelectorAll('.mese-cb').forEach(cb => cb.checked = false);
         document.getElementById('atletaFiltro').value = "";
         document.getElementById('risultatiAnnuali').innerHTML = "<div style='text-align:center; padding:20px; color:#666;'>Usa i filtri per cercare nel registro.</div>";
         document.getElementById('totaleRisultati').classList.add('hidden');
@@ -286,16 +386,26 @@
         
         google.script.run.withSuccessHandler(esito => {
           if (esito) {
+            localStorage.setItem('kratos_maestro_auth', 'OK');
             document.getElementById('loginView').classList.add('hidden');
             document.getElementById('dashboardView').classList.remove('hidden');
+            cambiaTab('vistaGiornaliera');
             inizializzaDatiAtleti(); 
             caricaDatiGiorno(); 
+            avviaPolling();
           } else {
             alert("PIN errato. Riprova.");
             btn.innerText = "Accedi";
             document.getElementById('pinInput').value = "";
           }
         }).verificaPin(pin);
+      }
+
+      function esci() {
+        localStorage.removeItem('kratos_maestro_auth');
+        document.getElementById('pinInput').value = "";
+        document.getElementById('dashboardView').classList.add('hidden');
+        document.getElementById('loginView').classList.remove('hidden');
       }
 
       function caricaDatiGiorno() {
@@ -310,18 +420,195 @@
         document.getElementById('loadingDash').classList.add('hidden');
         document.getElementById('contenutoDash').classList.remove('hidden');
         
+        const ulInAttesa = document.getElementById('listaInAttesa');
         const ulPartecipanti = document.getElementById('listaPartecipanti');
         const ulFurbetti = document.getElementById('listaFurbetti');
-        ulPartecipanti.innerHTML = ""; ulFurbetti.innerHTML = "";
+        ulInAttesa.innerHTML = ""; ulPartecipanti.innerHTML = ""; ulFurbetti.innerHTML = "";
         
+        document.getElementById('countInAttesa').innerText = dati.inAttesa ? dati.inAttesa.length : 0;
         document.getElementById('countPartecipanti').innerText = dati.partecipanti.length;
         document.getElementById('countFurbetti').innerText = dati.furbetti.length;
         
+        if (dati.inAttesa && dati.inAttesa.length > 0) {
+          document.getElementById('sezioneAppello').classList.remove('hidden');
+          dati.inAttesa.forEach(a => ulInAttesa.appendChild(creaRigaAppello(a)));
+        } else {
+          document.getElementById('sezioneAppello').classList.add('hidden');
+        }
+
+        if (dati.partecipanti.length > 0 || dati.furbetti.length > 0) {
+          document.getElementById('sezioneModifica').classList.remove('hidden');
+        } else {
+          document.getElementById('sezioneModifica').classList.add('hidden');
+        }
+
         dati.partecipanti.forEach(a => ulPartecipanti.appendChild(creaRigaCheckin(a, true, false)));
         dati.furbetti.forEach(a => ulFurbetti.appendChild(creaRigaCheckin(a, false, false)));
       }
 
+      
+      function getBeltHtml(cintura) {
+         if(!cintura) return '<span class="belt-icon belt-BIANCA"></span>';
+         return '<span class="belt-icon belt-' + cintura + '" title="' + cintura + '"></span>';
+      }
+
       function creaRigaAtletaGenerico(atleta) {
+          const li = document.createElement('li');
+          li.className = 'atleta-item';
+          
+          let iniziali = (atleta.nome.split(' ').map(n=>n[0]).join('')).substring(0,2);
+          let avatarHtml = atleta.fotoUrl ? `<img src="${atleta.fotoUrl}" class="avatar-rect" onclick="apriModal('${atleta.fotoUrl}', '${atleta.nome}')">` : `<div class="avatar">${iniziali}</div>`;
+          
+          li.innerHTML = `
+              <div class="atleta-info-wrapper">
+                  ${avatarHtml}
+                  <div class="atleta-nome">
+                      <strong>${atleta.nome} ${getBeltHtml(atleta.cintura)}</strong>
+                      <span class="data-iscrizione" style="margin-left:0; font-size:12px; color:#9ca3af;">Iscritto: ${atleta.dataIscrizione}</span>
+                  </div>
+              </div>
+          `;
+          return li;
+      }
+      
+      let atletiSelezionatiPromo = new Set();
+      
+      function renderizzaListaPromo(lista) {
+          const ul = document.getElementById('listaPromoAtleti');
+          ul.innerHTML = "";
+          document.getElementById('countPromoAtleti').innerText = lista.length;
+          
+          lista.forEach(atleta => {
+             const li = document.createElement('li');
+             li.className = 'atleta-item';
+             
+             let iniziali = (atleta.nome.split(' ').map(n=>n[0]).join('')).substring(0,2);
+             let avatarHtml = atleta.fotoUrl ? `<img src="${atleta.fotoUrl}" class="avatar-rect" style="width:30px; height:30px;">` : `<div class="avatar" style="width:30px; height:30px; font-size:12px;">${iniziali}</div>`;
+             
+             let checked = atletiSelezionatiPromo.has(atleta.nome) ? 'checked' : '';
+             
+             li.innerHTML = `
+                 <div class="atleta-info-wrapper">
+                     <input type="checkbox" class="promo-checkbox" style="width:20px; height:20px; margin-right:15px;" value="${atleta.nome}" onchange="togglePromoSelection(this)" ${checked}>
+                     ${avatarHtml}
+                     <div class="atleta-nome">
+                         <strong>${atleta.nome} ${getBeltHtml(atleta.cintura)}</strong>
+                     </div>
+                 </div>
+             `;
+             ul.appendChild(li);
+          });
+      }
+      
+      function togglePromoSelection(cb) {
+         if (cb.checked) atletiSelezionatiPromo.add(cb.value);
+         else atletiSelezionatiPromo.delete(cb.value);
+      }
+      
+      function filtraPromoLista() {
+          const query = document.getElementById('ricercaPromoLibera').value.toUpperCase();
+          const cinturaFiltro = document.getElementById('filtroCinturaPromo').value.toUpperCase();
+          const filtrati = databaseAtletiGlobale.filter(a => {
+             let matchNome = a.nome.includes(query);
+             let matchCintura = (!cinturaFiltro || a.cintura === cinturaFiltro);
+             return matchNome && matchCintura;
+          });
+          renderizzaListaPromo(filtrati);
+      }
+      
+      function apriModalPromo() {
+         if(atletiSelezionatiPromo.size === 0) {
+            alert("Seleziona almeno un atleta.");
+            return;
+         }
+         
+         const contenitore = document.getElementById('listaSelezionatiPromo');
+         contenitore.innerHTML = "";
+         
+         atletiSelezionatiPromo.forEach(nomeAtleta => {
+            let atleta = databaseAtletiGlobale.find(a => a.nome === nomeAtleta);
+            if(!atleta) return;
+            
+            let html = `
+               <div style="background:#374151; padding:10px; border-radius:8px; margin-bottom:10px;">
+                  <strong style="color:white; display:block; margin-bottom:5px;">${atleta.nome} ${getBeltHtml(atleta.cintura)}</strong>
+                  <select id="promoCintura_${atleta.nome.replace(/\s+/g, '_')}" class="date-picker" style="margin-bottom:5px;">
+                     <option value="" disabled selected>SCEGLI NUOVA CINTURA</option>
+                     <option value="BIANCA">BIANCA</option>
+                     <option value="BLU">BLU</option>
+                     <option value="VIOLA">VIOLA</option>
+                     <option value="MARRONE">MARRONE</option>
+                     <option value="NERA">NERA</option>
+                  </select>
+                  <input type="text" id="promoNote_${atleta.nome.replace(/\s+/g, '_')}" class="date-picker" placeholder="NOTE (OPZIONALE)">
+               </div>
+            `;
+            contenitore.innerHTML += html;
+         });
+         
+         document.getElementById('modalPromo').style.display = 'flex';
+      }
+      
+      function chiudiModalPromo() {
+         document.getElementById('modalPromo').style.display = 'none';
+      }
+      
+      function confermaPromozioni() {
+         let promozioni = [];
+         let valida = true;
+         
+         atletiSelezionatiPromo.forEach(nomeAtleta => {
+            let safeName = nomeAtleta.replace(/\s+/g, '_');
+            let sel = document.getElementById('promoCintura_' + safeName);
+            let note = document.getElementById('promoNote_' + safeName).value;
+            
+            if(!sel.value) {
+               valida = false;
+               sel.style.border = "2px solid red";
+            } else {
+               sel.style.border = "1px solid #4b5563";
+               promozioni.push({nome: nomeAtleta, cintura: sel.value, note: note});
+            }
+         });
+         
+         if(!valida) {
+            alert("Seleziona la nuova cintura per tutti gli atleti!");
+            return;
+         }
+         
+         let btn = document.querySelector('#modalPromo .btn-login');
+         btn.innerText = "SALVATAGGIO...";
+         btn.disabled = true;
+         
+         google.script.run.withSuccessHandler(res => {
+            alert(res.message);
+            btn.innerText = "CONFERMA E SALVA";
+            btn.disabled = false;
+            chiudiModalPromo();
+            if(res.success) {
+               atletiSelezionatiPromo.clear();
+               inizializzaDatiAtleti();
+            }
+         }).promuoviAtleti(promozioni);
+      }
+      
+      function stampaReportPromo() {
+         // Genera un semplice foglio stampabile
+         google.script.run.withSuccessHandler(storico => {
+            let html = "<html><head><title>Report Promozioni</title><style>body{font-family:sans-serif;} table{width:100%; border-collapse:collapse;} th,td{border:1px solid #ccc; padding:8px; text-align:left;}</style></head><body>";
+            html += "<h2>STORICO PASSAGGI DI CINTURA E ISCRIZIONI</h2><table><tr><th>DATA</th><th>NOME</th><th>EVENTO</th><th>CINTURA</th><th>NOTE</th></tr>";
+            storico.forEach(r => {
+               html += `<tr><td>${r.data}</td><td>${r.nome}</td><td>${r.evento}</td><td>${r.cintura}</td><td>${r.note}</td></tr>`;
+            });
+            html += "</table><script>window.print();</script></body></html>";
+            
+            let printWindow = window.open('', '_blank');
+            printWindow.document.write(html);
+            printWindow.document.close();
+         }).getStoricoCinture();
+      }
+
+      function creaRigaAtletaGenerico_old(atleta) {
         const li = document.createElement('li');
         li.className = 'atleta-item';
         
@@ -370,9 +657,79 @@
         return li;
       }
 
+      function creaRigaAppello(atleta) {
+        const li = document.createElement('li');
+        li.className = 'atleta-item';
+        
+        let avatarHtml = `<div class="avatar">${atleta.nome.charAt(0)}</div>`;
+        if(atleta.foto && atleta.foto !== "") {
+          avatarHtml = `<img src="${atleta.foto}" class="avatar" onclick="event.stopPropagation(); apriModal('${atleta.foto}', '${atleta.nome}')">`;
+        }
+
+        const infoExtra = `<small style="color:#666;">Ore: ${atleta.orario}</small>`;
+
+        li.innerHTML = `
+          <div class="atleta-info-wrapper">
+             ${avatarHtml}
+             <div class="atleta-nome">
+               <strong>${atleta.nome}</strong>
+               ${infoExtra}
+             </div>
+          </div>
+          <input type="checkbox" class="checkbox-appello" value="${atleta.riga}" checked>
+        `;
+        return li;
+      }
+
+      function ufficializzaClasse() {
+        const checkboxes = document.querySelectorAll('.checkbox-appello');
+        if (checkboxes.length === 0) return;
+        
+        const righeConfermati = [];
+        const righeFurbetti = [];
+        
+        checkboxes.forEach(cb => {
+          if (cb.checked) righeConfermati.push(parseInt(cb.value));
+          else righeFurbetti.push(parseInt(cb.value));
+        });
+        
+        const btn = document.getElementById('btnUfficializza');
+        btn.innerText = "Salvataggio in corso...";
+        btn.disabled = true;
+        
+        google.script.run.withSuccessHandler(() => {
+          btn.innerText = "✅ UFFICIALIZZA CLASSE";
+          btn.disabled = false;
+          caricaDatiGiorno();
+        }).ufficializzaPresenze(righeConfermati, righeFurbetti);
+      }
+
+      function mostraModalRiapertura() {
+        document.getElementById('modalConfermaRiapertura').classList.remove('hidden');
+      }
+
+      function chiudiModalRiapertura() {
+        document.getElementById('modalConfermaRiapertura').classList.add('hidden');
+      }
+
+      function confermaRiapertura() {
+        chiudiModalRiapertura();
+        
+        const dataSelezionata = document.getElementById('dataFiltro').value;
+        const btn = document.getElementById('btnModifica');
+        btn.innerText = "Attendere...";
+        btn.disabled = true;
+        
+        google.script.run.withSuccessHandler(() => {
+          btn.innerText = "🔄 MODIFICA APPELLO DI OGGI";
+          btn.disabled = false;
+          caricaDatiGiorno();
+        }).riapriClasse(dataSelezionata);
+      }
+
       function cercaStatistiche() {
         const anno = document.getElementById('annoFiltro').value;
-        const mese = document.getElementById('meseFiltro').value;
+        const mesiSelezionati = Array.from(document.querySelectorAll('.mese-cb:checked')).map(cb => parseInt(cb.value));
         const nome = document.getElementById('atletaFiltro').value.trim().toUpperCase(); 
         const container = document.getElementById('risultatiAnnuali');
         const totaleBox = document.getElementById('totaleRisultati');
@@ -399,7 +756,55 @@
           });
           container.appendChild(ul);
           
-        }).getStatisticheAnnuali(anno, mese, nome);
+        }).getStatisticheAnnuali(anno, mesiSelezionati, nome);
+      }
+
+      function avviaPolling() {
+        setInterval(() => {
+          if (document.getElementById('dashboardView').classList.contains('hidden')) return;
+
+          // Polling Vista Giornaliera
+          if (!document.getElementById('vistaGiornaliera').classList.contains('hidden')) {
+             let isDirty = false;
+             document.querySelectorAll('.checkbox-appello').forEach(cb => {
+               if (!cb.checked) isDirty = true;
+             });
+
+             if (!isDirty && !document.getElementById('btnUfficializza').disabled) {
+               const dataSelezionata = document.getElementById('dataFiltro').value;
+               google.script.run.withSuccessHandler(dati => {
+                 mostraDati(dati);
+               }).getDatiGiorno(dataSelezionata);
+             }
+          }
+          
+          // Polling Vista Atleti
+          else if (!document.getElementById('vistaAtleti').classList.contains('hidden')) {
+             const ricerca = document.getElementById('ricercaAtletiLibera').value;
+             // Non aggiorniamo se il maestro sta cercando qualcuno in quel momento
+             if (ricerca === "") {
+               google.script.run.withSuccessHandler(res => {
+                  // Aggiorna l'interfaccia solo se ci sono nuovi iscritti (per non perdere lo scroll)
+                  if (res.length !== databaseAtletiGlobale.length) {
+                      databaseAtletiGlobale = res; 
+                      
+                      const dataList = document.getElementById('listaAtletiMaestro');
+                      if (dataList) {
+                          dataList.innerHTML = "";
+                          res.forEach(a => {
+                              let opt = document.createElement('option');
+                              opt.value = a.nome;
+                              dataList.appendChild(opt);
+                          });
+                      }
+                      
+                      renderizzaListaAtleti(res);
+                  }
+               }).getAtleti();
+             }
+          }
+
+        }, 2000); // Aggiorna ogni 2 secondi in background
       }
     </script>
   </body>

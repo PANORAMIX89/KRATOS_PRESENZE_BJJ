@@ -5,10 +5,14 @@ const LON_PALESTRA = 10.7945698;//CASA MIA COORDINATE:10.8144647//KRATOS COORDIN
 const RAGGIO_MAX_METRI = 500;
 
 function doGet(e) {
-  if (e.parameter.vista === 'maestro') {
+  const vista = e.parameter.vista;
+  if (vista === 'maestro') {
     return HtmlService.createHtmlOutputFromFile('Maestro').setTitle('DASHBOARD MAESTRO').addMetaTag('viewport', 'width=device-width, initial-scale=1');
   } else {
-    return HtmlService.createHtmlOutputFromFile('Atleti').setTitle('PRESENZE KRATOS').addMetaTag('viewport', 'width=device-width, initial-scale=1');
+    const template = HtmlService.createTemplateFromFile('Atleti');
+    template.vistaIniziale = vista || 'home';
+    template.appUrl = ScriptApp.getService().getUrl();
+    return template.evaluate().setTitle('PRESENZE KRATOS').addMetaTag('viewport', 'width=device-width, initial-scale=1');
   }
 }
 
@@ -19,7 +23,7 @@ function getAtleti() {
   
   if (ultimaRiga < 4) return [];
   
-  const datiRaw = foglio.getRange(4, 1, ultimaRiga - 3, 3).getValues();
+  const datiRaw = foglio.getRange(4, 1, ultimaRiga - 3, 4).getValues();
   
   const atletiFormattati = datiRaw.filter(r => r[0] !== "").map(r => {
     let foto = "";
@@ -34,11 +38,14 @@ function getAtleti() {
     } else if (r[2]) {
       dataPulita = r[2].toString().trim();
     }
+    
+    let cintura = r[3] ? r[3].toString().toUpperCase().trim() : "BIANCA";
 
     return {
       nome: r[0].toString().toUpperCase().trim(),
       fotoUrl: foto,
-      dataIscrizione: dataPulita
+      dataIscrizione: dataPulita,
+      cintura: cintura
     };
   });
   
@@ -87,14 +94,13 @@ function getAppUrl() {
   return ScriptApp.getService().getUrl();
 }
 
-function registraPresenza(nome, latUtente, lonUtente) {
+function registraPresenza(nome) {
   try {
     const nomiValidi = getNomiAtleti();
     if (!nomiValidi.includes(nome)) {
       return { isOk: false, notFound: true, message: "ATLETA NON TROVATO" };
     }
 
-    const distanza = calcolaDistanza(LAT_PALESTRA, LON_PALESTRA, latUtente, lonUtente);
     const ss = SpreadsheetApp.openById(ID_FOGLIO);
     const foglioRegistro = ss.getSheetByName("REGISTRO GREZZO");
     
@@ -104,9 +110,30 @@ function registraPresenza(nome, latUtente, lonUtente) {
     
     const dataOdierna = new Date();
     const dataScritta = Utilities.formatDate(dataOdierna, Session.getScriptTimeZone(), "dd/MM/yyyy");
+    
+    const dati = foglioRegistro.getDataRange().getValues();
+    for (let i = dati.length - 1; i >= 1; i--) {
+      let dataRiga = dati[i][0];
+      if (dataRiga instanceof Date) {
+        dataRiga = Utilities.formatDate(dataRiga, Session.getScriptTimeZone(), "dd/MM/yyyy");
+      } else if (dataRiga) {
+        let strDate = dataRiga.toString().trim();
+        let matchStr = strDate.match(/(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/);
+        dataRiga = matchStr ? matchStr[0] : strDate.split(" ")[0];
+      }
+      
+      if (dataRiga === dataScritta && dati[i][3] === nome) {
+        let orarioTrovato = dati[i][1];
+        if (orarioTrovato instanceof Date) {
+          orarioTrovato = Utilities.formatDate(orarioTrovato, Session.getScriptTimeZone(), "HH:mm");
+        }
+        return { isOk: false, message: `Ti sei già registrato oggi alle ore ${orarioTrovato}!` };
+      }
+    }
+    
     const orario = Utilities.formatDate(dataOdierna, Session.getScriptTimeZone(), "HH:mm");
     
-    const stato = (distanza <= RAGGIO_MAX_METRI) ? "OK REGISTRAZIONE" : "FURBETTO";
+    const stato = "IN ATTESA";
     
     const giornoInglese = Utilities.formatDate(dataOdierna, Session.getScriptTimeZone(), "EEEE").toUpperCase();
     const traduzioneGiorni = {
@@ -115,15 +142,19 @@ function registraPresenza(nome, latUtente, lonUtente) {
     };
     const giornoSettimana = traduzioneGiorni[giornoInglese] || giornoInglese;
     
-    foglioRegistro.appendRow([dataScritta, orario, giornoSettimana, nome, stato]);
+    const atletiSalvati = getAtleti();
+    const atletaTrovato = atletiSalvati.find(a => a.nome === nome.toUpperCase());
+    const cinturaAttuale = atletaTrovato ? atletaTrovato.cintura : "BIANCA";
     
-    return { isOk: (stato === "OK REGISTRAZIONE"), message: stato };
+    foglioRegistro.appendRow([dataScritta, orario, giornoSettimana, nome, stato, cinturaAttuale]);
+    
+    return { isOk: true, message: stato };
   } catch (errore) {
     return { isOk: false, message: "Errore Server: " + errore.message };
   }
 }
 
-function registraNuovoAtleta(nome, dataUriImmagine) {
+function registraNuovoAtleta(nome, dataUriImmagine, cintura) {
   try {
     // FIX: CONTROLLO ANTI-DUPLICATI
     const nomeDaVerificare = nome.toUpperCase().trim();
@@ -158,8 +189,15 @@ function registraNuovoAtleta(nome, dataUriImmagine) {
     
     const dataOdierna = new Date();
     const dataScritta = Utilities.formatDate(dataOdierna, Session.getScriptTimeZone(), "dd/MM/yyyy");
+    const cinturaScritta = cintura ? cintura.toUpperCase() : "BIANCA";
     
-    ss.getSheetByName("ATLETI").appendRow([nome, file.getUrl(), dataScritta]);
+    ss.getSheetByName("ATLETI").appendRow([nome, file.getUrl(), dataScritta, cinturaScritta]);
+    
+    // Salva nello storico
+    const foglioStorico = ss.getSheetByName("STORICO CINTURE");
+    if (foglioStorico) {
+      foglioStorico.appendRow([nome, dataScritta, cinturaScritta, "ISCRIZIONE", ""]);
+    }
     
     return { success: true, message: "ISCRIZIONE COMPLETATA. OSS!" };
   } catch (e) { 
@@ -176,7 +214,7 @@ function getDatiGiorno(dataSelezionataTesto) {
   const ss = SpreadsheetApp.openById(ID_FOGLIO);
   const datiRegistro = ss.getSheetByName("REGISTRO GREZZO").getDataRange().getValues();
   const atletiSalvati = getAtleti(); 
-  let partecipanti = [], furbetti = [];
+  let partecipanti = [], furbetti = [], inAttesa = [];
   
   for (let i = 1; i < datiRegistro.length; i++) {
     if (!datiRegistro[i][0]) continue; 
@@ -197,13 +235,135 @@ function getDatiGiorno(dataSelezionataTesto) {
       
       let atletaTrovato = atletiSalvati.find(a => a.nome === nomeAtleta.toUpperCase());
       let foto = atletaTrovato ? atletaTrovato.fotoUrl : "";
+      let cintura = atletaTrovato ? atletaTrovato.cintura : "BIANCA";
       
-      esito === "OK REGISTRAZIONE" 
-        ? partecipanti.push({nome: nomeAtleta, foto: foto, orario: orarioCheckin}) 
-        : furbetti.push({nome: nomeAtleta, foto: foto, orario: orarioCheckin});
+      if (esito === "IN ATTESA") {
+        inAttesa.push({nome: nomeAtleta, foto: foto, cintura: cintura, orario: orarioCheckin, riga: i + 1});
+      } else if (esito.startsWith("OK REGISTRAZIONE")) {
+        partecipanti.push({nome: nomeAtleta, foto: foto, cintura: cintura, orario: orarioCheckin});
+      } else {
+        furbetti.push({nome: nomeAtleta, foto: foto, cintura: cintura, orario: orarioCheckin});
+      }
     }
   }
-  return { partecipanti, furbetti };
+  return { inAttesa, partecipanti, furbetti };
+}
+
+function ufficializzaPresenze(righeConfermati, righeFurbetti) {
+  const ss = SpreadsheetApp.openById(ID_FOGLIO);
+  const foglioRegistro = ss.getSheetByName("REGISTRO GREZZO");
+  
+  if (righeConfermati && righeConfermati.length > 0) {
+    righeConfermati.forEach(r => foglioRegistro.getRange(r, 5).setValue("OK REGISTRAZIONE"));
+  }
+  
+  if (righeFurbetti && righeFurbetti.length > 0) {
+    righeFurbetti.forEach(r => foglioRegistro.getRange(r, 5).setValue("FURBETTO"));
+  }
+  
+  return true;
+}
+
+function riapriClasse(dataSelezionataTesto) {
+  const ss = SpreadsheetApp.openById(ID_FOGLIO);
+  const foglioRegistro = ss.getSheetByName("REGISTRO GREZZO");
+  const datiRegistro = foglioRegistro.getDataRange().getValues();
+  
+  for (let i = 1; i < datiRegistro.length; i++) {
+    if (!datiRegistro[i][0]) continue; 
+    
+    const dataCompleta = new Date(datiRegistro[i][0]);
+    const dataRiga = Utilities.formatDate(dataCompleta, Session.getScriptTimeZone(), "yyyy-MM-dd");
+    
+    if (dataRiga === dataSelezionataTesto) {
+      let esito = datiRegistro[i][4];
+      if (esito && (esito.startsWith("OK REGISTRAZIONE") || esito === "FURBETTO")) {
+        foglioRegistro.getRange(i + 1, 5).setValue("IN ATTESA");
+      }
+    }
+  }
+  return true;
+}
+
+function creaSimulazioneAtleti() {
+  const ss = SpreadsheetApp.openById(ID_FOGLIO);
+  let foglioAtleti = ss.getSheetByName("ATLETI");
+  if (!foglioAtleti) return "Foglio ATLETI non trovato.";
+  
+  // Pulisce i vecchi iscritti (i dati partono dalla riga 4)
+  if (foglioAtleti.getLastRow() > 3) {
+    foglioAtleti.getRange(4, 1, foglioAtleti.getLastRow() - 3, foglioAtleti.getLastColumn()).clearContent();
+  }
+  
+  const cartella = DriveApp.getFolderById(ID_CARTELLA_FOTO);
+  
+  const atleti = [
+    { nome: "MARIO ROSSI", urlImg: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=150" }, // Banana
+    { nome: "GIULIA VERDI", urlImg: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=150" }, // Ananas
+    { nome: "FRANCESCA NERI", urlImg: "https://images.unsplash.com/photo-1528825871115-3581a5387919?w=150" }, // Fragola
+    { nome: "ALESSANDRO GIALLETTI", urlImg: "https://images.unsplash.com/photo-1582979512210-99b6a53386f9?w=150" }, // Arancia
+    { nome: "MARTINA ESPOSITO", urlImg: "https://images.unsplash.com/photo-1528821128474-27f963b062bf?w=150" }, // Ciliegie
+    { nome: "LORENZO RICCI", urlImg: "https://images.unsplash.com/photo-1423483641154-5411ec9c0ddf?w=150" }, // Limone vec
+    { nome: "ANTONIO RUSSO", urlImg: "https://images.unsplash.com/photo-1558298064-28a1eb2f01eb?w=150" }, // Arancia 2
+    { nome: "ELENA ROMANO", urlImg: "https://images.unsplash.com/photo-1588600878108-578307a3cc9d?w=150" }, // Kiwi
+    { nome: "MATTEO FERRARI", urlImg: "https://images.unsplash.com/photo-1553279768-865429fa0078?w=150" }, // Mango
+    { nome: "CHIARA BIANCO", urlImg: "https://images.unsplash.com/photo-1595475207225-428b62bda831?w=150" }, // Anguria
+    { nome: "DAVIDE GALLO", urlImg: "https://images.unsplash.com/photo-1590502593747-422e118991b5?w=150" } // Limone 2
+  ];
+  
+  const dataOdierna = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm");
+  
+  atleti.forEach(a => {
+    let linkDrive = "";
+    try {
+       const res = UrlFetchApp.fetch(a.urlImg);
+       const blob = res.getBlob().setName(a.nome + "_frutta.jpg");
+       const file = cartella.createFile(blob);
+       file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+       linkDrive = file.getUrl();
+    } catch(e) {
+       linkDrive = a.urlImg; // Fallback
+    }
+    
+    foglioAtleti.appendRow([a.nome, linkDrive, dataOdierna]);
+  });
+  
+  return "Simulazione completata. Vecchi atleti eliminati e 11 nuovi atleti con foto creati.";
+}
+
+function simulaPresenzeOggi() {
+  const ss = SpreadsheetApp.openById(ID_FOGLIO);
+  const foglioRegistro = ss.getSheetByName("REGISTRO GREZZO");
+  
+  // Pulisce il registro per avere un test pulito (i dati partono dalla riga 2)
+  if (foglioRegistro.getLastRow() > 1) {
+    foglioRegistro.getRange(2, 1, foglioRegistro.getLastRow() - 1, foglioRegistro.getLastColumn()).clearContent();
+  }
+  
+  const nomi = [
+    "MARIO ROSSI", "GIULIA VERDI", "FRANCESCA NERI", 
+    "ALESSANDRO GIALLETTI", "MARTINA ESPOSITO", "LORENZO RICCI", 
+    "ANTONIO RUSSO", "ELENA ROMANO", "MATTEO FERRARI", 
+    "CHIARA BIANCO", "DAVIDE GALLO"
+  ];
+  
+  const dataOdierna = new Date();
+  const dataScritta = Utilities.formatDate(dataOdierna, Session.getScriptTimeZone(), "dd/MM/yyyy");
+  
+  const giornoInglese = Utilities.formatDate(dataOdierna, Session.getScriptTimeZone(), "EEEE").toUpperCase();
+  const traduzioneGiorni = {
+    "MONDAY": "LUNEDÌ", "TUESDAY": "MARTEDÌ", "WEDNESDAY": "MERCOLEDÌ",
+    "THURSDAY": "GIOVEDÌ", "FRIDAY": "VENERDÌ", "SATURDAY": "SABATO", "SUNDAY": "DOMENICA"
+  };
+  const giornoSettimana = traduzioneGiorni[giornoInglese] || giornoInglese;
+
+  nomi.forEach((nome, index) => {
+    let oraCheckin = new Date(dataOdierna.getTime() - (index * 60000));
+    let orario = Utilities.formatDate(oraCheckin, Session.getScriptTimeZone(), "HH:mm");
+    foglioRegistro.appendRow([dataScritta, orario, giornoSettimana, nome, "IN ATTESA"]);
+  });
+  
+  return "Registro pulito. 10 presenze simulate per oggi.";
 }
 
 function calcolaDistanza(lat1, lon1, lat2, lon2) {
@@ -213,7 +373,7 @@ function calcolaDistanza(lat1, lon1, lat2, lon2) {
   return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
 }
 
-function getStatisticheAnnuali(anno, mese, nome) {
+function getStatisticheAnnuali(anno, mesi, nome) {
   const ss = SpreadsheetApp.openById(ID_FOGLIO); 
   const foglioRegistro = ss.getSheetByName('REGISTRO GREZZO');
   
@@ -236,11 +396,10 @@ function getStatisticheAnnuali(anno, mese, nome) {
     const esito = datiRegistro[i][4];
     
     const matchAnno = (!anno || dataObj.getFullYear() == anno);
-    const matchMese = (!mese || (dataObj.getMonth() + 1) == mese);
-    const matchNome = (!nome || nomeAtleta === nome.toUpperCase());
-    const matchOk = (esito === "OK REGISTRAZIONE");
+    const matchMese = (!mesi || mesi.length === 0 || mesi.includes(dataObj.getMonth() + 1));
+    const matchNome = (!nome || nomeAtleta.includes(nome));
     
-    if (matchAnno && matchMese && matchNome && matchOk) {
+    if (matchAnno && matchMese && matchNome && esito && esito.startsWith("OK REGISTRAZIONE")) {
       let valoreDataRaw = datiRegistro[i][0];
       let dataPulita = "";
       
@@ -256,31 +415,114 @@ function getStatisticheAnnuali(anno, mese, nome) {
         data: dataPulita,
         ora: ora,
         giorno: giorno,
-        nome: datiRegistro[i][3],
+        nome: nomeAtleta,
         foto: dizionarioFoto[nomeAtleta] || ""
       });
     }
   }
+  
+  // Ordina per data (dal più recente)
+  risultati.sort((a, b) => {
+    const d1 = a.data.split('/');
+    const d2 = b.data.split('/');
+    return new Date(d2[2], d2[1]-1, d2[0]) - new Date(d1[2], d1[1]-1, d1[0]);
+  });
+  
   return risultati;
 }
 
 function azzeraDatabase() {
   const ss = SpreadsheetApp.openById(ID_FOGLIO);
   
+  // Funzione di supporto per cancellare i dati mantenendo le formule
+  function clearKeepFormulas(sheet, startRow, startCol, numRows, numCols) {
+    if (!sheet || numRows <= 0 || numCols <= 0) return;
+    const range = sheet.getRange(startRow, startCol, numRows, numCols);
+    const formulas = range.getFormulas();
+    range.clearContent();
+    range.setFormulas(formulas);
+  }
+  
   const foglioAtleti = ss.getSheetByName("ATLETI");
-  if (foglioAtleti.getLastRow() > 3) {
-    foglioAtleti.getRange(4, 1, foglioAtleti.getLastRow() - 3, 3).clearContent();
+  if (foglioAtleti && foglioAtleti.getLastRow() > 3) {
+    clearKeepFormulas(foglioAtleti, 4, 1, foglioAtleti.getLastRow() - 3, 3);
   }
   
   const foglioRegistro = ss.getSheetByName("REGISTRO GREZZO");
-  if (foglioRegistro.getLastRow() > 1) {
-    foglioRegistro.getRange(2, 1, foglioRegistro.getLastRow() - 1, 5).clearContent();
+  if (foglioRegistro && foglioRegistro.getLastRow() > 1) {
+    clearKeepFormulas(foglioRegistro, 2, 1, foglioRegistro.getLastRow() - 1, 5);
   }
   
   const foglioDash = ss.getSheetByName("DASHBOARD ANNUALE");
-  if (foglioDash.getLastRow() > 5) {
-    foglioDash.getRange(6, 3, foglioDash.getLastRow() - 5, 6).clearContent();
+  if (foglioDash && foglioDash.getLastRow() > 5) {
+    clearKeepFormulas(foglioDash, 6, 3, foglioDash.getLastRow() - 5, 6);
   }
   
-  return "DATABASE AZZERATO CON SUCCESSO. IL SISTEMA È VERGINE.";
+  return "DATABASE AZZERATO CON SUCCESSO. IL SISTEMA È VERGINE (Formule mantenute).";
+}
+
+function promuoviAtleti(promozioni) {
+  try {
+    const ss = SpreadsheetApp.openById(ID_FOGLIO);
+    const foglioStorico = ss.getSheetByName("STORICO CINTURE");
+    const foglioAtleti = ss.getSheetByName("ATLETI");
+    
+    if (!foglioStorico || !foglioAtleti) {
+      return { success: false, message: "Fogli STORICO CINTURE o ATLETI non trovati!" };
+    }
+    
+    const dataOdierna = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy");
+    
+    const atletiDati = foglioAtleti.getDataRange().getValues();
+    
+    promozioni.forEach(promo => {
+      const nomeAtleta = promo.nome.toUpperCase();
+      const nuovaCintura = promo.cintura.toUpperCase();
+      const note = promo.note ? promo.note.toUpperCase() : "";
+      
+      // 1. Salva nello Storico
+      foglioStorico.appendRow([nomeAtleta, dataOdierna, nuovaCintura, "PROMOZIONE", note]);
+      
+      // 2. Aggiorna cintura in ATLETI (colonna D, indice 3)
+      for (let i = 3; i < atletiDati.length; i++) {
+        if (atletiDati[i][0] && atletiDati[i][0].toString().toUpperCase().trim() === nomeAtleta) {
+          foglioAtleti.getRange(i + 1, 4).setValue(nuovaCintura);
+          break;
+        }
+      }
+    });
+    
+    return { success: true, message: "PROMOZIONI REGISTRATE CON SUCCESSO!" };
+  } catch (e) {
+    return { success: false, message: "Errore: " + e.message };
+  }
+}
+
+function getStoricoCinture() {
+  const ss = SpreadsheetApp.openById(ID_FOGLIO);
+  const foglioStorico = ss.getSheetByName("STORICO CINTURE");
+  if (!foglioStorico) return [];
+  
+  const dati = foglioStorico.getDataRange().getValues();
+  if (dati.length <= 3) return []; // Intestazioni
+  
+  const storico = [];
+  for (let i = 3; i < dati.length; i++) {
+    if (!dati[i][0]) continue;
+    let dataPulita = "";
+    if (dati[i][1] instanceof Date) {
+      dataPulita = Utilities.formatDate(dati[i][1], Session.getScriptTimeZone(), "dd/MM/yyyy");
+    } else {
+      dataPulita = dati[i][1].toString();
+    }
+    
+    storico.push({
+      nome: dati[i][0].toString(),
+      data: dataPulita,
+      cintura: dati[i][2].toString(),
+      evento: dati[i][3].toString(),
+      note: dati[i][4] ? dati[i][4].toString() : ""
+    });
+  }
+  return storico;
 }
