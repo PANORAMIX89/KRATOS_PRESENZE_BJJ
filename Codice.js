@@ -19,51 +19,51 @@ function doGet(e) {
 function getAtleti() {
   const ss = SpreadsheetApp.openById(ID_FOGLIO);
   const foglio = ss.getSheetByName("ATLETI");
-  const ultimaRiga = foglio.getLastRow();
+  const datiRaw = foglio.getDataRange().getValues();
   
-  if (ultimaRiga < 4) return [];
-  
-  const datiRaw = foglio.getRange(4, 1, ultimaRiga - 3, 4).getValues();
-  
-  const atletiFormattati = datiRaw.filter(r => r[0] !== "").map(r => {
-    let foto = "";
-    if (r[1]) {
-      const match = r[1].toString().match(/\/d\/([-\w]{25,})/);
-      foto = match ? "https://drive.google.com/thumbnail?id=" + match[1] + "&sz=w400" : r[1];
-    }
-    
-    let dataPulita = "";
-    if (r[2] instanceof Date) {
-      dataPulita = Utilities.formatDate(r[2], Session.getScriptTimeZone(), "dd/MM/yyyy");
-    } else if (r[2]) {
-      dataPulita = r[2].toString().trim();
-    }
-    
-    let cintura = r[3] ? r[3].toString().toUpperCase().trim() : "BIANCA";
+  const atletiFormattati = [];
+  let dataStart = 3;
+  for(let i=0; i<datiRaw.length; i++) {
+     if(datiRaw[i][0] && datiRaw[i][0].toString().trim().toUpperCase() === "NOME E COGNOME") {
+         dataStart = i + 1;
+         break;
+     }
+  }
 
-    return {
-      nome: r[0].toString().toUpperCase().trim(),
-      fotoUrl: foto,
-      dataIscrizione: dataPulita,
-      cintura: cintura
-    };
-  });
+  for(let i=dataStart; i<datiRaw.length; i++) {
+     let r = datiRaw[i];
+     if(!r[0]) continue;
+     
+     let foto = "";
+     if (r[1]) {
+       const match = r[1].toString().match(/\/d\/([-\w]{25,})/);
+       foto = match ? "https://drive.google.com/thumbnail?id=" + match[1] + "&sz=w400" : r[1];
+     }
+     
+     let dataPulita = "";
+     if (r[2] instanceof Date) {
+       dataPulita = Utilities.formatDate(r[2], Session.getScriptTimeZone(), "dd/MM/yyyy");
+     } else if (r[2]) {
+       dataPulita = r[2].toString().trim();
+     }
+     
+     let cintura = r[3] ? r[3].toString().toUpperCase().trim() : "BIANCA";
+ 
+     atletiFormattati.push({
+       nome: r[0].toString().toUpperCase().trim(),
+       fotoUrl: foto,
+       dataIscrizione: dataPulita,
+       cintura: cintura
+     });
+  }
   
   atletiFormattati.sort((a, b) => a.nome.localeCompare(b.nome));
-  
   return atletiFormattati;
 }
 
 function getNomiAtleti() {
-  const ss = SpreadsheetApp.openById(ID_FOGLIO);
-  const foglio = ss.getSheetByName("ATLETI");
-  const ultimaRiga = foglio.getLastRow();
-  
-  if (ultimaRiga < 4) return [];
-  
-  const dati = foglio.getRange(4, 1, ultimaRiga - 3, 1).getValues();
-  let nomi = dati.map(r => r[0].toString().trim()).filter(nome => nome !== "");
-  return nomi.sort(); 
+  const atleti = getAtleti();
+  return atleti.map(a => a.nome).sort();
 }
 
 function getAnniTendina() {

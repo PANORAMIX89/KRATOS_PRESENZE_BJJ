@@ -633,33 +633,69 @@
       let databasePromoGlobale = [];
       
       function renderizzaListaPromo(lista) {
-
-
-          const ul = document.getElementById('listaPromoAtleti');
-          ul.innerHTML = "";
-          document.getElementById('countPromoAtleti').innerText = lista.length;
+          const containerIdonei = document.getElementById('listaIdoneiPromo');
+          const containerInPercorso = document.getElementById('listaInPercorsoPromo');
+          containerIdonei.innerHTML = "";
+          containerInPercorso.innerHTML = "";
+          
+          let countIdonei = 0;
+          let countInPercorso = 0;
           
           lista.forEach(atleta => {
-             const li = document.createElement('li');
+             const li = document.createElement('div');
              li.className = 'atleta-item';
+             li.style.display = 'flex';
+             li.style.flexDirection = 'column';
+             li.style.alignItems = 'flex-start';
              
              let iniziali = (atleta.nome.split(' ').map(n=>n[0]).join('')).substring(0,2);
-             let avatarHtml = atleta.fotoUrl ? `<img src="${atleta.fotoUrl}" class="avatar" style="width:40px; height:40px; border-radius:50%;">` : `<div class="avatar" style="width:40px; height:40px; border-radius:50%; font-size:12px;">${iniziali}</div>`;
+             let avatarHtml = atleta.fotoUrl ? `<img src="${atleta.fotoUrl}" class="avatar">` : `<div class="avatar">${iniziali}</div>`;
              
-             let checked = atletiSelezionatiPromo.has(atleta.nome) ? 'checked' : '';
+             let perc = Math.min(100, (atleta.presenzeDalGrado / atleta.targetTotale) * 100);
+             let barColor = perc >= 100 ? '#4ade80' : '#f97316';
              
-             li.innerHTML = `
-                 <div class="atleta-info-wrapper">
-                     <input type="checkbox" class="promo-checkbox" style="width:20px; height:20px; margin-right:15px;" value="${atleta.nome}" onchange="togglePromoSelection(this)" ${checked}>
+             let inner = `
+                 <div class="atleta-info-wrapper" style="width:100%;">
                      ${avatarHtml}
-                     <div class="atleta-nome">
+                     <div class="atleta-nome" style="width:100%;">
                          <strong style="display:block; margin-bottom:5px;">${atleta.nome} ${getBeltHtml(atleta.cintura)}</strong>
-                         <div style="font-size:12px; color:#9ca3af;">Da: ${atleta.dataUltimaCintura} (${atleta.mesiTrascorsi} mesi) - <span style="color:#f97316; font-weight:bold;">${atleta.presenzeDalGrado} lezioni</span></div>
+                         <div style="font-size:12px; color:#9ca3af; margin-bottom:5px;">Da: ${atleta.dataUltimaCintura} (${atleta.mesiTrascorsi} mesi) - Ultima: ${atleta.ultimoAllenamento}</div>
+                         
+                         <div style="width:100%; background-color:#4b5563; border-radius:4px; height:12px; overflow:hidden; position:relative; margin-bottom:5px;">
+                            <div style="background-color:${barColor}; height:100%; width:${perc}%; transition: width 0.5s;"></div>
+                         </div>
+                         <div style="font-size:12px; text-align:right; color:white; font-weight:bold;">
+                            ${atleta.presenzeDalGrado} / ${atleta.targetTotale} lezioni
+                            ${atleta.malus > 0 ? `<span style="color:#f87171;">(Malus +${atleta.malus})</span>` : ''}
+                         </div>
                      </div>
                  </div>
              `;
-             ul.appendChild(li);
+             
+             if (atleta.idoneo) {
+                 countIdonei++;
+                 let checked = atletiSelezionatiPromo.has(atleta.nome) ? 'checked' : '';
+                 inner += `
+                    <div style="display:flex; width:100%; margin-top:15px; gap:10px;">
+                       <button onclick="chiediRimanda('${atleta.nome}')" style="flex:1; padding:8px; background-color:#ef4444; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">RIMANDA</button>
+                       <label style="flex:2; display:flex; align-items:center; justify-content:center; background-color:#374151; border:1px solid #4ade80; border-radius:6px; padding:8px; cursor:pointer;">
+                          <input type="checkbox" class="promo-checkbox" style="margin-right:10px; width:18px; height:18px;" value="${atleta.nome}" onchange="togglePromoSelection(this)" ${checked}> 
+                          SELEZIONA PER PROMOZIONE
+                       </label>
+                    </div>
+                 `;
+                 li.innerHTML = inner;
+                 li.style.borderLeft = "4px solid #4ade80";
+                 containerIdonei.appendChild(li);
+             } else {
+                 countInPercorso++;
+                 li.innerHTML = inner;
+                 containerInPercorso.appendChild(li);
+             }
           });
+          
+          document.getElementById('countIdonei').innerText = countIdonei;
+          document.getElementById('countInPercorso').innerText = countInPercorso;
       }
       
       function togglePromoSelection(cb) {
