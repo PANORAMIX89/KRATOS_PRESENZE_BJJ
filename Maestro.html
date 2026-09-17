@@ -402,6 +402,38 @@
          document.getElementById('modalAnagrafica').style.display = 'flex';
          
          google.script.run.withSuccessHandler(res => {
+
+            if (res.statsAvanzate) {
+               let a = res.statsAvanzate;
+               let perc = Math.min(100, (a.presenzeDalGrado / a.targetTotale) * 100);
+               let color = perc >= 100 ? '#4ade80' : '#f97316';
+               
+               let statsHtml = `
+                  <div style="margin: 15px 0; background:#374151; padding:15px; border-radius:8px;">
+                     <h4 style="margin-top:0; color:white; font-size:14px; margin-bottom:15px;">STATISTICHE CINTURA ATTUALE</h4>
+                     <div style="display:flex; align-items:center; justify-content:center; gap:20px;">
+                        
+                        <!-- Grafico Circolare (CSS puro) -->
+                        <div style="position:relative; width:80px; height:80px; border-radius:50%; background: conic-gradient(${color} ${perc * 3.6}deg, #1f2937 0deg); display:flex; align-items:center; justify-content:center;">
+                           <div style="position:absolute; width:64px; height:64px; background:#374151; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+                              <span style="font-weight:bold; font-size:16px; color:white;">${Math.floor(perc)}%</span>
+                           </div>
+                        </div>
+                        
+                        <div style="text-align:left; font-size:13px; color:#d1d5db; line-height:1.6;">
+                           <div>Presenze: <strong style="color:white; font-size:15px;">${a.presenzeDalGrado} / ${a.targetTotale}</strong></div>
+                           ${a.malus > 0 ? `<div style="color:#f87171;">Malus rimandato: +${a.malus} lezioni</div>` : ''}
+                           <div>Ultima Presenza: <strong>${a.ultimoAllenamento}</strong></div>
+                           <div>Data Rilascio: <strong>${a.dataUltimaCintura}</strong></div>
+                        </div>
+                     </div>
+                  </div>
+               `;
+               document.getElementById('anagraficaStatsAvanzate').innerHTML = statsHtml;
+            } else {
+               document.getElementById('anagraficaStatsAvanzate').innerHTML = "";
+            }
+            
             document.getElementById('anagraficaPresenze').innerText = res.presenzeTotali;
             
             let timelineHtml = "";
@@ -422,7 +454,7 @@
             }
             document.getElementById('anagraficaTimeline').innerHTML = timelineHtml;
             
-         }).getAnagraficaAtleta(nome);
+         }).getAnagraficaAvanzata(nome);
       }
       
       function chiudiAnagrafica() {
@@ -551,18 +583,57 @@
       let atletiSelezionatiPromo = new Set();
       
       
+
       function caricaDatiPromozione() {
          document.getElementById('loadingPromo').classList.remove('hidden');
          document.getElementById('contenutoPromo').classList.add('hidden');
          google.script.run.withSuccessHandler(res => {
-            databasePromoGlobale = res;
-            renderizzaListaPromo(res);
-         }).getDatiPromozione();
+            databasePromoGlobale = res.atleti;
+            
+            // Popola gli input di configurazione
+            document.getElementById('targetBIANCA').value = res.config.BIANCA;
+            document.getElementById('targetBLU').value = res.config.BLU;
+            document.getElementById('targetVIOLA').value = res.config.VIOLA;
+            document.getElementById('targetMARRONE').value = res.config.MARRONE;
+            document.getElementById('targetNERA').value = res.config.NERA;
+            
+            renderizzaListaPromo(res.atleti);
+         }).getDatiPromozioneAvanzati();
+      }
+      
+      function salvaTarget() {
+         let btn = document.getElementById('btnSalvaTarget');
+         btn.innerText = "Salvataggio...";
+         let config = {
+             BIANCA: parseInt(document.getElementById('targetBIANCA').value) || 80,
+             BLU: parseInt(document.getElementById('targetBLU').value) || 120,
+             VIOLA: parseInt(document.getElementById('targetVIOLA').value) || 150,
+             MARRONE: parseInt(document.getElementById('targetMARRONE').value) || 200,
+             NERA: parseInt(document.getElementById('targetNERA').value) || 200
+         };
+         google.script.run.withSuccessHandler(() => {
+             btn.innerText = "SALVA TARGET CINTURE";
+             alert("Target aggiornati con successo!");
+             caricaDatiPromozione(); // Ricarica tutto
+         }).salvaConfigurazioniCinture(config);
+      }
+      
+      function chiediRimanda(nome) {
+         let extra = prompt("Di quante lezioni vuoi rimandare " + nome + "?", "20");
+         if(extra && !isNaN(extra)) {
+            let container = document.getElementById('listaIdoneiPromo');
+            container.innerHTML = "<div class='loader-container'><div class='loader'></div></div>";
+            google.script.run.withSuccessHandler(res => {
+               alert(res.message);
+               caricaDatiPromozione();
+            }).rimandaAtleta(nome, parseInt(extra));
+         }
       }
 
       let databasePromoGlobale = [];
       
       function renderizzaListaPromo(lista) {
+
 
           const ul = document.getElementById('listaPromoAtleti');
           ul.innerHTML = "";
