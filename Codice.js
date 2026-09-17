@@ -569,3 +569,93 @@ function getAnagraficaAtleta(nome) {
     storico: storico
   };
 }
+
+
+function getDatiPromozione() {
+  const ss = SpreadsheetApp.openById(ID_FOGLIO);
+  const atletiDati = ss.getSheetByName("ATLETI").getDataRange().getValues();
+  const storicoDati = ss.getSheetByName("STORICO CINTURE").getDataRange().getValues();
+  const registroDati = ss.getSheetByName("REGISTRO GREZZO").getDataRange().getValues();
+  
+  const mapStorico = {}; // nome -> data ultima cintura
+  for (let i = 3; i < storicoDati.length; i++) {
+    const nome = storicoDati[i][0] ? storicoDati[i][0].toString().toUpperCase().trim() : "";
+    if (!nome) continue;
+    let dataVal = storicoDati[i][1];
+    if (dataVal) {
+      // Le righe in basso sono le più recenti, quindi teniamo l'ultima sovrascrivendo
+      if (dataVal instanceof Date) {
+         mapStorico[nome] = dataVal;
+      } else {
+         let p = dataVal.toString().split("/");
+         if (p.length === 3) mapStorico[nome] = new Date(p[2], p[1]-1, p[0]);
+      }
+    }
+  }
+
+  const mapPresenze = {}; // nome -> presenze da data ultima cintura
+  for (let i = 1; i < registroDati.length; i++) {
+    const esito = registroDati[i][4] ? registroDati[i][4].toString() : "";
+    if (!esito.startsWith("OK REGISTRAZIONE")) continue;
+    
+    const nome = registroDati[i][3] ? registroDati[i][3].toString().toUpperCase().trim() : "";
+    if (!nome) continue;
+    
+    let dataReg = registroDati[i][0];
+    let dateObj;
+    if (dataReg instanceof Date) dateObj = dataReg;
+    else {
+       let strDate = dataReg.toString().trim();
+       let matchStr = strDate.match(/(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/);
+       if (matchStr) {
+          let p = matchStr[0].split(/[/-]/);
+          dateObj = new Date(p[2], p[1]-1, p[0]);
+       }
+    }
+    
+    if (dateObj) {
+      if (!mapPresenze[nome]) mapPresenze[nome] = 0;
+      let dataInizio = mapStorico[nome] || new Date(0);
+      if (dateObj >= dataInizio) {
+        mapPresenze[nome]++;
+      }
+    }
+  }
+  
+  const risultati = [];
+  const oggi = new Date();
+  for (let i = 3; i < atletiDati.length; i++) {
+    const nome = atletiDati[i][0] ? atletiDati[i][0].toString().toUpperCase().trim() : "";
+    if (!nome) continue;
+    
+    let foto = "";
+    if (atletiDati[i][1]) {
+      const match = atletiDati[i][1].toString().match(/\/d\/([-\w]{25,})/);
+      foto = match ? "https://drive.google.com/thumbnail?id=" + match[1] + "&sz=w400" : atletiDati[i][1];
+    }
+    
+    let cintura = atletiDati[i][3] ? atletiDati[i][3].toString().toUpperCase().trim() : "BIANCA";
+    let dataUltima = mapStorico[nome];
+    
+    let strDataUltima = "--/--/----";
+    let mesiPassati = 0;
+    if (dataUltima) {
+       strDataUltima = Utilities.formatDate(dataUltima, Session.getScriptTimeZone(), "dd/MM/yyyy");
+       let diffTime = Math.abs(oggi - dataUltima);
+       mesiPassati = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 30.416)); 
+    }
+    
+    risultati.push({
+       nome: nome,
+       fotoUrl: foto,
+       cintura: cintura,
+       dataUltimaCintura: strDataUltima,
+       mesiTrascorsi: mesiPassati,
+       presenzeDalGrado: mapPresenze[nome] || 0
+    });
+  }
+  
+  // Ordina per presenze (chi ha frequentato di più prima)
+  risultati.sort((a,b) => b.presenzeDalGrado - a.presenzeDalGrado);
+  return risultati;
+}
