@@ -877,56 +877,140 @@ function getDatiPromozioneAvanzati() {
 }
 
 // Sostituisco la vecchia getAnagraficaAtleta per sfruttare i nuovi calcoli
+// Sostituisco la vecchia getAnagraficaAtleta per sfruttare i nuovi calcoli VELOCI per un singolo atleta
 function getAnagraficaAvanzata(nome) {
    try {
-       let dati = getDatiPromozioneAvanzati();
-       if (dati.error) {
-           return { error: dati.error, presenzeTotali: 0, storico: [], statsAvanzate: null };
-       }
-       let atleta = dati.atleti.find(a => a.nome.toUpperCase() === nome.toUpperCase());
+       const nomeUpper = nome.toUpperCase();
+       const ss = SpreadsheetApp.openById(ID_FOGLIO);
        
-       // Prendo lo storico
-   const ss = SpreadsheetApp.openById(ID_FOGLIO);
-   const foglioStorico = ss.getSheetByName("STORICO CINTURE");
-   const storico = [];
-   if (foglioStorico) {
-     const datiStorico = foglioStorico.getDataRange().getValues();
-     for (let i = 3; i < datiStorico.length; i++) {
-       if (datiStorico[i][0] && datiStorico[i][0].toString().toUpperCase() === nome.toUpperCase()) {
-         let dataPulita = datiStorico[i][1];
-         if (dataPulita instanceof Date) {
-           dataPulita = Utilities.formatDate(dataPulita, Session.getScriptTimeZone(), "dd/MM/yyyy");
-         } else {
-           dataPulita = dataPulita.toString();
-         }
-         let tipoEvento = datiStorico[i][3] ? datiStorico[i][3].toString() : "";
-         let noteColF = datiStorico[i][5] ? datiStorico[i][5].toString() : ""; // F è index 5
-         if(datiStorico[i].length < 6) noteColF = datiStorico[i][4] ? datiStorico[i][4].toString() : ""; // Fallback se index 4 era note
-         
-         let lezioniExtra = datiStorico[i][4] ? datiStorico[i][4].toString() : ""; // Col E
-         let testoNote = noteColF;
-         if (tipoEvento === "RIMANDATO" && lezioniExtra) {
-             testoNote = "+ " + lezioniExtra + " lezioni. " + noteColF;
-         }
-         
-         storico.push({
-           data: dataPulita,
-           cintura: datiStorico[i][2].toString(),
-           evento: tipoEvento,
-           note: testoNote
-         });
+       const foglioAtleti = ss.getSheetByName("ATLETI");
+       const foglioStorico = ss.getSheetByName("STORICO CINTURE");
+       const foglioRegistro = ss.getSheetByName("REGISTRO GREZZO");
+       
+       if (!foglioAtleti || !foglioStorico || !foglioRegistro) {
+           return { error: "Fogli mancanti", presenzeTotali: 0, storico: [], statsAvanzate: null };
        }
-     }
-   }
-   
-       if (!atleta) {
-           return { presenzeTotali: 0, storico: storico, statsAvanzate: null };
+       
+       const datiAtleti = foglioAtleti.getDataRange().getValues();
+       const datiStorico = foglioStorico.getDataRange().getValues();
+       const datiRegistro = foglioRegistro.getDataRange().getValues();
+       const targetCinture = getConfigurazioniCinture();
+       
+       let atletaInfo = null;
+       let dataStart = 3;
+       for(let i=0; i<datiAtleti.length; i++) {
+           if(datiAtleti[i][0] && datiAtleti[i][0].toString().trim().toUpperCase() === "NOME E COGNOME") {
+               dataStart = i + 1; break;
+           }
        }
+       for(let i=dataStart; i<datiAtleti.length; i++) {
+           if(datiAtleti[i][0] && datiAtleti[i][0].toString().trim().toUpperCase() === nomeUpper) {
+               atletaInfo = {
+                   nome: nomeUpper,
+                   fotoUrl: datiAtleti[i][1] ? datiAtleti[i][1].toString() : "",
+                   cintura: datiAtleti[i][3] ? datiAtleti[i][3].toString().toUpperCase().trim() : "BIANCA"
+               };
+               break;
+           }
+       }
+       
+       if(!atletaInfo) return { error: "Atleta non trovato", presenzeTotali: 0, storico: [], statsAvanzate: null };
+       
+       let dataUltimaPromozione = new Date(0);
+       let malus = 0;
+       let storico = [];
+       
+       for (let i = 3; i < datiStorico.length; i++) {
+           if (datiStorico[i][0] && datiStorico[i][0].toString().toUpperCase() === nomeUpper) {
+               let dataVal = datiStorico[i][1];
+               let dataObj = new Date(0);
+               if (dataVal instanceof Date) {
+                   dataObj = dataVal;
+               }
+               
+               let tipoEvento = datiStorico[i][3] ? datiStorico[i][3].toString().toUpperCase().trim() : "";
+               let noteColF = datiStorico[i][5] ? datiStorico[i][5].toString() : ""; 
+               if(datiStorico[i].length < 6) noteColF = datiStorico[i][4] ? datiStorico[i][4].toString() : "";
+               
+               let lezioniExtra = datiStorico[i][4] ? parseInt(datiStorico[i][4]) : 0;
+               if(isNaN(lezioniExtra)) lezioniExtra = 0;
+               
+               if (tipoEvento === "PROMOZIONE" || tipoEvento === "ISCRIZIONE") {
+                   if (dataObj >= dataUltimaPromozione) {
+                       dataUltimaPromozione = dataObj;
+                       malus = 0;
+                   }
+               } else if (tipoEvento === "RIMANDATO") {
+                   if (dataObj >= dataUltimaPromozione) {
+                       malus += lezioniExtra;
+                   }
+               }
+               
+               let dataPulita = dataVal instanceof Date ? Utilities.formatDate(dataVal, Session.getScriptTimeZone(), "dd/MM/yyyy") : dataVal.toString();
+               let testoNote = noteColF;
+               if (tipoEvento === "RIMANDATO" && lezioniExtra > 0) {
+                   testoNote = "+ " + lezioniExtra + " lezioni. " + noteColF;
+               }
+               
+               storico.push({
+                   data: dataPulita,
+                   cintura: datiStorico[i][2] ? datiStorico[i][2].toString() : "",
+                   evento: tipoEvento,
+                   note: testoNote
+               });
+           }
+       }
+       
+       let presenze = 0;
+       let ultimoAllenamento = null;
+       for (let i = 1; i < datiRegistro.length; i++) {
+           let esito = datiRegistro[i][4] ? datiRegistro[i][4].toString() : "";
+           if (!esito.startsWith("OK REGISTRAZIONE")) continue;
+           
+           let nomeReg = datiRegistro[i][3] ? datiRegistro[i][3].toString().toUpperCase().trim() : "";
+           if (nomeReg !== nomeUpper) continue;
+           
+           let dataReg = datiRegistro[i][0];
+           if (dataReg instanceof Date) {
+               if (dataReg >= dataUltimaPromozione) {
+                   presenze++;
+                   if (!ultimoAllenamento || dataReg > ultimoAllenamento) {
+                       ultimoAllenamento = dataReg;
+                   }
+               }
+           }
+       }
+       
+       let targetBase = targetCinture[atletaInfo.cintura] || 100;
+       let targetTotale = targetBase + malus;
+       
+       let strDataUltima = "--/--/----";
+       let mesiPassati = 0;
+       if (dataUltimaPromozione.getTime() > 0) {
+           strDataUltima = Utilities.formatDate(dataUltimaPromozione, Session.getScriptTimeZone(), "dd/MM/yyyy");
+           let oggi = new Date();
+           let diffTime = Math.abs(oggi - dataUltimaPromozione);
+           mesiPassati = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 30.416));
+       }
+       
+       let strUltimo = "--/--/----";
+       if (ultimoAllenamento) {
+           strUltimo = Utilities.formatDate(ultimoAllenamento, Session.getScriptTimeZone(), "dd/MM/yyyy");
+       }
+       
+       atletaInfo.dataUltimaCintura = strDataUltima;
+       atletaInfo.mesiTrascorsi = mesiPassati;
+       atletaInfo.presenzeDalGrado = presenze;
+       atletaInfo.targetBase = targetBase;
+       atletaInfo.malus = malus;
+       atletaInfo.targetTotale = targetTotale;
+       atletaInfo.idoneo = presenze >= targetTotale;
+       atletaInfo.ultimoAllenamento = strUltimo;
        
        return {
-           presenzeTotali: atleta.presenzeDalGrado, 
+           presenzeTotali: presenze,
            storico: storico,
-           statsAvanzate: atleta
+           statsAvanzate: atletaInfo
        };
    } catch (e) {
        return { error: e.toString(), presenzeTotali: 0, storico: [], statsAvanzate: null };
