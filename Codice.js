@@ -1013,11 +1013,12 @@ function getAnagraficaAvanzata(nome) {
        atletaInfo.idoneo = presenze >= targetTotale;
        atletaInfo.ultimoAllenamento = strUltimo;
        
-       return {
-           presenzeTotali: presenze,
-           storico: storico,
-           statsAvanzate: atletaInfo
-       };
+        return {
+            presenzeTotali: presenze,
+            storico: storico,
+            statsAvanzate: atletaInfo,
+            targetCinture: targetCinture
+        };
    } catch (e) {
        return { error: e.toString(), presenzeTotali: 0, storico: [], statsAvanzate: null };
    }

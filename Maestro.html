@@ -534,21 +534,37 @@
             document.getElementById('anagraficaPresenze').innerText = res.presenzeTotali;
             
             let timelineHtml = "";
-            if(res.storico && res.storico.length > 0) {
-               res.storico.reverse().forEach(ev => {
-                  timelineHtml += `
-                     <div style="display:flex; margin-bottom:10px; align-items:center; background:#4b5563; padding:8px; border-radius:6px;">
-                        <div style="margin-right:10px;">${getBeltHtml(ev.cintura)}</div>
-                        <div style="flex-grow:1;">
-                           <div style="font-weight:bold; color:white;">${ev.cintura} <span style="font-size:11px; font-weight:normal; color:#f97316;">(${ev.evento})</span></div>
-                           <div style="font-size:12px;">${ev.data} ${ev.note ? ' - <i>'+ev.note+'</i>' : ''}</div>
-                        </div>
-                     </div>
-                  `;
-               });
-            } else {
-               timelineHtml = "<div>Nessuno storico presente per questo atleta.</div>";
-            }
+            let beltSequence = ["BIANCA", "BLU", "VIOLA", "MARRONE", "NERA"];
+            let currentBeltIndex = beltSequence.indexOf(cintura);
+            if(currentBeltIndex === -1) currentBeltIndex = 0; // fallback
+
+            beltSequence.forEach((belt, index) => {
+               let eventiBelt = res.storico ? res.storico.filter(e => e.cintura === belt) : [];
+               let targetBase = res.targetCinture ? (res.targetCinture[belt] || 0) : 0;
+               
+               let stato = index < currentBeltIndex ? "COMPLETATA" : (index === currentBeltIndex ? "CINTURA ATTUALE" : "DA RAGGIUNGERE");
+               let colorStato = index < currentBeltIndex ? "#4ade80" : (index === currentBeltIndex ? "#f97316" : "#9ca3af");
+               
+               timelineHtml += `<div style="margin-bottom:10px; background:#374151; padding:10px; border-radius:6px; border-left:4px solid ${colorStato};">`;
+               timelineHtml += `<div style="display:flex; align-items:center;">
+                                   <div style="margin-right:10px;">${getBeltHtml(belt)}</div>
+                                   <div style="flex-grow:1; text-align:left;">
+                                      <div style="font-weight:bold; color:white;">${belt} <span style="font-size:11px; color:${colorStato};">(${stato})</span></div>
+                                      <div style="font-size:12px; color:#d1d5db;">Target Base: ${targetBase} lezioni</div>
+                                   </div>
+                                </div>`;
+               
+               if(eventiBelt.length > 0) {
+                   eventiBelt.reverse().forEach(ev => {
+                      timelineHtml += `<div style="margin-top:8px; font-size:12px; color:#d1d5db; border-top:1px solid #4b5563; padding-top:4px; text-align:left;">
+                                          <span style="color:#f97316;">${ev.data}</span> - <strong>${ev.evento}</strong> 
+                                          ${ev.note ? '<br><i style="color:#9ca3af;">' + ev.note + '</i>' : ''}
+                                       </div>`;
+                   });
+               }
+               
+               timelineHtml += `</div>`;
+            });
             document.getElementById('anagraficaTimeline').innerHTML = timelineHtml;
             
          }).getAnagraficaAvanzata(nome);
@@ -790,9 +806,9 @@
                  <div class="atleta-info-wrapper" style="width:100%;">
                      ${avatarHtml}
                      <div class="atleta-nome" style="width:100%;">
-                         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:5px;">
-                             <strong style="display:block;">${atleta.nome} ${getBeltHtml(atleta.cintura)}</strong>
-                             <div style="display:flex; gap:5px; align-items:center;">
+                         <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; margin-bottom:5px; gap:5px;">
+                             <strong style="display:block; flex:1; min-width:150px;">${atleta.nome} ${getBeltHtml(atleta.cintura)}</strong>
+                             <div style="display:flex; gap:5px; align-items:center; flex-shrink:0;">
                                 <button onclick="chiediRimanda('${atleta.nome}')" style="padding:4px 8px; background-color:#ef4444; color:white; border:none; border-radius:4px; font-weight:bold; font-size:10px; cursor:pointer;">RIMANDA</button>
                                 <label style="display:flex; align-items:center; background-color:#374151; border:1px solid #4ade80; border-radius:4px; padding:4px 8px; cursor:pointer; font-size:10px; color:white; font-weight:bold;">
                                    <input type="checkbox" class="promo-checkbox" style="margin-right:5px; width:12px; height:12px; accent-color:#4ade80;" value="${atleta.nome}" onchange="togglePromoSelection(this)" ${checked}> 
