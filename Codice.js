@@ -219,16 +219,47 @@ function getDatiGiorno(dataSelezionataTesto) {
     for (let i = 1; i < datiRegistro.length; i++) {
       if (!datiRegistro[i][0]) continue; 
       
-      const dataCompleta = new Date(datiRegistro[i][0]);
-      if (isNaN(dataCompleta.getTime())) continue; // Salta righe con date invalide
-      const dataRiga = Utilities.formatDate(dataCompleta, Session.getScriptTimeZone(), "yyyy-MM-dd");
+      let rawData = datiRegistro[i][0];
+      let strDataRiga = "";
+      let dataCompletaPerOrario = new Date();
       
-      if (dataRiga === dataSelezionataTesto) {
+      if (rawData instanceof Date) {
+         strDataRiga = Utilities.formatDate(rawData, Session.getScriptTimeZone(), "yyyy-MM-dd");
+         dataCompletaPerOrario = rawData;
+      } else {
+         let strDate = rawData.toString().trim();
+         let matchStr = strDate.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+         if (matchStr) {
+             // Formato dd/MM/yyyy -> yyyy-MM-dd
+             let gg = matchStr[1].padStart(2, '0');
+             let mm = matchStr[2].padStart(2, '0');
+             let aaaa = matchStr[3];
+             strDataRiga = `${aaaa}-${mm}-${gg}`;
+         } else {
+             // Prova parse ISO
+             let d = new Date(strDate);
+             if (!isNaN(d.getTime())) {
+                 strDataRiga = Utilities.formatDate(d, Session.getScriptTimeZone(), "yyyy-MM-dd");
+                 dataCompletaPerOrario = d;
+             } else {
+                 continue; // Formato incomprensibile
+             }
+         }
+      }
+      
+      if (strDataRiga === dataSelezionataTesto) {
         let orarioCheckin = datiRegistro[i][1];
         if (orarioCheckin instanceof Date) {
           orarioCheckin = Utilities.formatDate(orarioCheckin, Session.getScriptTimeZone(), "HH:mm");
         } else if (!orarioCheckin) {
-          orarioCheckin = Utilities.formatDate(dataCompleta, Session.getScriptTimeZone(), "HH:mm");
+          // Se non c'è orario esplicito, prova a estrarlo da rawData se contiene un orario
+          let strRaw = rawData.toString();
+          let matchOra = strRaw.match(/(\d{2}):(\d{2})/);
+          if(matchOra) {
+             orarioCheckin = matchOra[0];
+          } else {
+             orarioCheckin = Utilities.formatDate(dataCompletaPerOrario, Session.getScriptTimeZone(), "HH:mm");
+          }
         }
         
         const nomeAtleta = String(datiRegistro[i][3] || "").trim(); 
