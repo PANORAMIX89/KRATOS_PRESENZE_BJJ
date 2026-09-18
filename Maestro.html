@@ -89,12 +89,18 @@
       .error-msg { color: #dc3545; font-size: 14px; margin-top: 10px; }
       
       .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-      .modal-content { background: #1f2937; color: white; padding: 25px; border-radius: 12px; max-width: 90%; width: 350px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
+      .modal-content { background: #1f2937; color: white; padding: 25px; border-radius: 12px; max-width: 90%; max-height: 90vh; overflow-y: auto; width: 350px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
       .modal-content h3 { color: #d35400; margin-top: 0; font-size: 22px; }
       .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
       .modal-buttons button { flex: 1; padding: 12px; margin: 0; font-size: 16px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; }
       .btn-annulla-modal { background: #6c757d; color: white; }
       .btn-conferma-modal { background: #d35400; color: white; }
+
+      /* TOAST NOTIFICATION */
+      #toastContainer { position: fixed; bottom: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 10px; }
+      .toast { background-color: #374151; color: white; padding: 15px 20px; border-radius: 8px; border-left: 4px solid #f97316; box-shadow: 0 4px 6px rgba(0,0,0,0.3); font-family: inherit; font-size: 14px; animation: slideIn 0.3s ease-out forwards; }
+      @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+      @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
 
       .check-svg { width: 14px; fill: white; }
 
@@ -347,6 +353,25 @@
 
     <script>
       let databaseAtletiGlobale = []; 
+      
+      function mostraNotifica(messaggio, tipo = 'success') {
+         let container = document.getElementById('toastContainer');
+         if(!container) {
+            container = document.createElement('div');
+            container.id = 'toastContainer';
+            document.body.appendChild(container);
+         }
+         let toast = document.createElement('div');
+         toast.className = 'toast';
+         toast.style.borderLeftColor = tipo === 'error' ? '#ef4444' : '#4ade80';
+         toast.innerText = messaggio;
+         container.appendChild(toast);
+         
+         setTimeout(() => {
+            toast.style.animation = 'fadeOut 0.3s ease-out forwards';
+            setTimeout(() => toast.remove(), 300);
+         }, 3000);
+      }
 
       document.addEventListener("DOMContentLoaded", function() {
         const tzOffset = (new Date()).getTimezoneOffset() * 60000; 
@@ -465,7 +490,7 @@
          
          google.script.run.withSuccessHandler(res => {
             if (res.error) {
-                alert("ERRORE SUL SERVER: " + res.error);
+                mostraNotifica("ERRORE SUL SERVER: " + res.error, 'error');
                 document.getElementById('modalAnagrafica').style.display = 'none';
                 return;
             }
@@ -657,7 +682,7 @@
          document.getElementById('contenutoPromo').classList.add('hidden');
          google.script.run.withSuccessHandler(res => {
             if (res.error) {
-                alert("ERRORE SUL SERVER: " + res.error);
+                mostraNotifica("ERRORE SUL SERVER: " + res.error, 'error');
                 document.getElementById('loadingPromo').classList.add('hidden');
                 document.getElementById('contenutoPromo').classList.remove('hidden');
                 return;
@@ -689,7 +714,7 @@
          };
          google.script.run.withSuccessHandler(() => {
              btn.innerText = "SALVA TARGET CINTURE";
-             alert("Target aggiornati con successo!");
+             mostraNotifica("Target aggiornati con successo!");
              caricaDatiPromozione(); // Ricarica tutto
          }).salvaConfigurazioniCinture(config);
       }
@@ -717,7 +742,7 @@
          let extra = document.getElementById('rimandaExtra').value;
          let note = document.getElementById('rimandaNote').value;
          if(!extra || isNaN(extra) || parseInt(extra) <= 0) {
-             alert("Inserisci un numero valido di lezioni extra.");
+             mostraNotifica("Inserisci un numero valido di lezioni extra.", 'error');
              return;
          }
          
@@ -726,7 +751,7 @@
          document.getElementById('loadingPromo').classList.remove('hidden');
          
          google.script.run.withSuccessHandler(() => {
-             alert(atletaDaRimandare + " rimandato di " + extra + " lezioni.");
+             mostraNotifica(atletaDaRimandare + " rimandato di " + extra + " lezioni.");
              caricaDatiPromozione();
          }).rimandaAtleta(atletaDaRimandare, parseInt(extra), note);
       }
@@ -765,7 +790,7 @@
                          <div style="width:100%; background-color:#4b5563; border-radius:4px; height:12px; overflow:hidden; position:relative; margin-bottom:5px;">
                             <div style="background-color:${barColor}; height:100%; width:${perc}%; transition: width 0.5s;"></div>
                          </div>
-                         <div style="font-size:12px; text-align:right; color:white; font-weight:bold;">
+                         <div style="font-size:12px; text-align:right; color:white; font-weight:bold; word-wrap: break-word;">
                             ${atleta.presenzeDalGrado} / ${atleta.targetTotale} lezioni
                             ${atleta.malus > 0 ? `<span style="color:#f87171;">(Malus +${atleta.malus})</span>` : ''}
                          </div>
@@ -816,7 +841,7 @@
       
       function apriModalPromo() {
          if(atletiSelezionatiPromo.size === 0) {
-            alert("Seleziona almeno un atleta.");
+            mostraNotifica("Seleziona almeno un atleta.", 'error');
             return;
          }
          
@@ -870,7 +895,7 @@
          });
          
          if(!valida) {
-            alert("Seleziona la nuova cintura per tutti gli atleti!");
+            mostraNotifica("Seleziona la nuova cintura per tutti gli atleti!", 'error');
             return;
          }
          
@@ -879,7 +904,7 @@
          btn.disabled = true;
          
          google.script.run.withSuccessHandler(res => {
-            alert(res.message);
+            mostraNotifica(res.message, res.success ? 'success' : 'error');
             btn.innerText = "CONFERMA E SALVA";
             btn.disabled = false;
             chiudiModalPromo();
