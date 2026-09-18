@@ -694,7 +694,7 @@ function salvaConfigurazioniCinture(nuovaConfig) {
   return { success: true };
 }
 
-function rimandaAtleta(nome, lezioniExtra) {
+function rimandaAtleta(nome, lezioniExtra, note) {
   const ss = SpreadsheetApp.openById(ID_FOGLIO);
   const foglioStorico = ss.getSheetByName("STORICO CINTURE");
   
@@ -713,13 +713,15 @@ function rimandaAtleta(nome, lezioniExtra) {
      }
   }
 
+  const notaTesto = note ? note.toString().trim() : "Rimandato dal Maestro";
+
   foglioStorico.appendRow([
      nome,
      oggiLocal,
      cinturaAttuale,
      "RIMANDATO",
      parseInt(lezioniExtra) || 0,
-     "Rimandato dal Maestro"
+     notaTesto
   ]);
   
   return { success: true, message: "Atleta rimandato. Aggiunte " + lezioniExtra + " lezioni al target." };
@@ -918,6 +920,7 @@ function getAnagraficaAvanzata(nome) {
        
        let dataUltimaPromozione = new Date(0);
        let malus = 0;
+       let ultimaNotaMalus = "";
        let storico = [];
        
        for (let i = 3; i < datiStorico.length; i++) {
@@ -935,16 +938,18 @@ function getAnagraficaAvanzata(nome) {
                let lezioniExtra = datiStorico[i][4] ? parseInt(datiStorico[i][4]) : 0;
                if(isNaN(lezioniExtra)) lezioniExtra = 0;
                
-               if (tipoEvento === "PROMOZIONE" || tipoEvento === "ISCRIZIONE") {
-                   if (dataObj >= dataUltimaPromozione) {
-                       dataUltimaPromozione = dataObj;
-                       malus = 0;
-                   }
-               } else if (tipoEvento === "RIMANDATO") {
-                   if (dataObj >= dataUltimaPromozione) {
-                       malus += lezioniExtra;
-                   }
-               }
+                if (tipoEvento === "PROMOZIONE" || tipoEvento === "ISCRIZIONE") {
+                    if (dataObj >= dataUltimaPromozione) {
+                        dataUltimaPromozione = dataObj;
+                        malus = 0;
+                        ultimaNotaMalus = "";
+                    }
+                } else if (tipoEvento === "RIMANDATO") {
+                    if (dataObj >= dataUltimaPromozione) {
+                        malus += lezioniExtra;
+                        if(noteColF) ultimaNotaMalus = noteColF;
+                    }
+                }
                
                let dataPulita = dataVal instanceof Date ? Utilities.formatDate(dataVal, Session.getScriptTimeZone(), "dd/MM/yyyy") : dataVal.toString();
                let testoNote = noteColF;
@@ -1003,6 +1008,7 @@ function getAnagraficaAvanzata(nome) {
        atletaInfo.presenzeDalGrado = presenze;
        atletaInfo.targetBase = targetBase;
        atletaInfo.malus = malus;
+       atletaInfo.ultimaNotaMalus = ultimaNotaMalus;
        atletaInfo.targetTotale = targetTotale;
        atletaInfo.idoneo = presenze >= targetTotale;
        atletaInfo.ultimoAllenamento = strUltimo;

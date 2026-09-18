@@ -119,8 +119,10 @@
       
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
         <h1 style="margin:0; font-size: 24px;">Dashboard Maestro</h1>
-        <button class="btn-reset" style="padding: 10px 15px; width: auto; font-size: 14px;" onclick="esci()">Esci</button>
-        <button class="tab-btn" id="btnTab3" onclick="cambiaTab('vistaPromozioni')">PROMO</button>
+        <div style="display:flex; gap:10px;">
+           <button class="btn-main" style="padding: 10px 15px; width: auto; font-size: 14px;" onclick="apriConfigTarget()">TIME PROMO</button>
+           <button class="btn-reset" style="padding: 10px 15px; width: auto; font-size: 14px;" onclick="esci()">Esci</button>
+        </div>
       </div>
       
       <div class="tabs">
@@ -262,6 +264,55 @@
          <div id="listaSelezionatiPromo" style="margin-bottom:20px;"></div>
          <button class="btn-login" onclick="confermaPromozioni()">CONFERMA E SALVA</button>
          <button class="btn-reset" style="margin-top:10px;" onclick="chiudiModalPromo()">ANNULLA</button>
+      </div>
+    </div>
+
+    <!-- Modale Rimanda -->
+    <div id="modalRimanda" class="modal" style="display:none; justify-content:center; align-items:center;">
+      <div class="modal-content" style="background:#1f2937; padding:20px; width:90%; max-width:400px; border: 2px solid #f97316; border-radius:12px; position:relative;">
+         <h2 style="color:white; text-align:center; margin-top:0;">RIMANDA ATLETA</h2>
+         <h3 id="rimandaNome" style="color:#f97316; text-align:center;"></h3>
+         <div style="margin-top:15px;">
+            <label style="color:white; font-size:14px;">Lezioni Extra:</label>
+            <input type="number" id="rimandaExtra" class="date-picker" value="10" min="1">
+         </div>
+         <div style="margin-top:10px;">
+            <label style="color:white; font-size:14px;">Note (Opzionale):</label>
+            <input type="text" id="rimandaNote" class="date-picker" placeholder="Motivo...">
+         </div>
+         <button class="btn-login" style="margin-top:20px;" onclick="confermaRimanda()">SALVA</button>
+         <button class="btn-reset" style="margin-top:10px;" onclick="chiudiModalRimanda()">ANNULLA</button>
+      </div>
+    </div>
+
+    <!-- Modale Configura Target -->
+    <div id="modalConfigTarget" class="modal" style="display:none; justify-content:center; align-items:center;">
+      <div class="modal-content" style="background:#1f2937; padding:20px; width:90%; max-width:400px; border: 2px solid #f97316; border-radius:12px;">
+         <h2 style="color:white; text-align:center; margin-top:0;">TIME PROMO (TARGET)</h2>
+         
+         <div style="display:flex; align-items:center; margin-bottom:10px;">
+            <span class="belt-icon belt-BIANCA"></span> <span style="color:white; width:80px; margin-left:10px;">BIANCA:</span>
+            <input type="number" id="targetBIANCA" class="date-picker" style="margin-bottom:0;" value="80">
+         </div>
+         <div style="display:flex; align-items:center; margin-bottom:10px;">
+            <span class="belt-icon belt-BLU"></span> <span style="color:white; width:80px; margin-left:10px;">BLU:</span>
+            <input type="number" id="targetBLU" class="date-picker" style="margin-bottom:0;" value="120">
+         </div>
+         <div style="display:flex; align-items:center; margin-bottom:10px;">
+            <span class="belt-icon belt-VIOLA"></span> <span style="color:white; width:80px; margin-left:10px;">VIOLA:</span>
+            <input type="number" id="targetVIOLA" class="date-picker" style="margin-bottom:0;" value="150">
+         </div>
+         <div style="display:flex; align-items:center; margin-bottom:10px;">
+            <span class="belt-icon belt-MARRONE"></span> <span style="color:white; width:80px; margin-left:10px;">MARRONE:</span>
+            <input type="number" id="targetMARRONE" class="date-picker" style="margin-bottom:0;" value="200">
+         </div>
+         <div style="display:flex; align-items:center; margin-bottom:20px;">
+            <span class="belt-icon belt-NERA"></span> <span style="color:white; width:80px; margin-left:10px;">NERA:</span>
+            <input type="number" id="targetNERA" class="date-picker" style="margin-bottom:0;" value="200">
+         </div>
+         
+         <button id="btnSalvaTarget" class="btn-login" onclick="salvaTarget()">SALVA TARGET</button>
+         <button class="btn-reset" style="margin-top:10px;" onclick="chiudiConfigTarget()">CHIUDI</button>
       </div>
     </div>
 
@@ -440,8 +491,9 @@
                         <div style="text-align:left; font-size:13px; color:#d1d5db; line-height:1.6;">
                            <div>Presenze: <strong style="color:white; font-size:15px;">${a.presenzeDalGrado} / ${a.targetTotale}</strong></div>
                            ${a.malus > 0 ? `<div style="color:#f87171;">Malus rimandato: +${a.malus} lezioni</div>` : ''}
-                           <div>Ultima Presenza: <strong>${a.ultimoAllenamento}</strong></div>
-                           <div>Data Rilascio: <strong>${a.dataUltimaCintura}</strong></div>
+                           <div style="margin-top:15px; font-size:12px; color:#9ca3af; text-align:center;">
+                           ${a.malus > 0 ? `Target Base: ${a.targetBase} + <span style="color:#ef4444;">${a.malus} extra</span> = <strong>${a.targetTotale}</strong>` : `Target Base: ${a.targetBase}`}
+                           ${a.malus > 0 && a.ultimaNotaMalus ? `<br><span style="color:#f87171; font-style:italic; font-size:11px;">Nota Maestro: "${a.ultimaNotaMalus}"</span>` : ''}
                         </div>
                      </div>
                   </div>
@@ -641,16 +693,41 @@
          }).salvaConfigurazioniCinture(config);
       }
       
+      function apriConfigTarget() {
+         document.getElementById('modalConfigTarget').style.display = 'flex';
+      }
+      function chiudiConfigTarget() {
+         document.getElementById('modalConfigTarget').style.display = 'none';
+      }
+      
+      let atletaDaRimandare = "";
       function chiediRimanda(nome) {
-         let extra = prompt("Di quante lezioni vuoi rimandare " + nome + "?", "20");
-         if(extra && !isNaN(extra)) {
-            let container = document.getElementById('listaIdoneiPromo');
-            container.innerHTML = "<div class='loader-container'><div class='loader'></div></div>";
-            google.script.run.withSuccessHandler(res => {
-               alert(res.message);
-               caricaDatiPromozione();
-            }).rimandaAtleta(nome, parseInt(extra));
+         atletaDaRimandare = nome;
+         document.getElementById('rimandaNome').innerText = nome;
+         document.getElementById('rimandaExtra').value = "10";
+         document.getElementById('rimandaNote').value = "";
+         document.getElementById('modalRimanda').style.display = 'flex';
+      }
+      function chiudiModalRimanda() {
+         document.getElementById('modalRimanda').style.display = 'none';
+      }
+      
+      function confermaRimanda() {
+         let extra = document.getElementById('rimandaExtra').value;
+         let note = document.getElementById('rimandaNote').value;
+         if(!extra || isNaN(extra) || parseInt(extra) <= 0) {
+             alert("Inserisci un numero valido di lezioni extra.");
+             return;
          }
+         
+         chiudiModalRimanda();
+         document.getElementById('contenutoPromo').classList.add('hidden');
+         document.getElementById('loadingPromo').classList.remove('hidden');
+         
+         google.script.run.withSuccessHandler(() => {
+             alert(atletaDaRimandare + " rimandato di " + extra + " lezioni.");
+             caricaDatiPromozione();
+         }).rimandaAtleta(atletaDaRimandare, parseInt(extra), note);
       }
 
       let databasePromoGlobale = [];
