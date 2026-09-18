@@ -538,11 +538,17 @@
             let currentBeltIndex = beltSequence.indexOf(cintura);
             if(currentBeltIndex === -1) currentBeltIndex = 0; // fallback
 
-            beltSequence.forEach((belt, index) => {
+            let beltsToShow = beltSequence.filter((belt, index) => {
+               let eventiBelt = res.storico ? res.storico.filter(e => e.cintura === belt) : [];
+               return eventiBelt.length > 0 || index === currentBeltIndex;
+            });
+
+            beltsToShow.forEach((belt) => {
+               let index = beltSequence.indexOf(belt);
                let eventiBelt = res.storico ? res.storico.filter(e => e.cintura === belt) : [];
                let targetBase = res.targetCinture ? (res.targetCinture[belt] || 0) : 0;
                
-               let stato = index < currentBeltIndex ? "COMPLETATA" : (index === currentBeltIndex ? "CINTURA ATTUALE" : "DA RAGGIUNGERE");
+               let stato = index < currentBeltIndex ? "CONSEGUITA" : (index === currentBeltIndex ? "CINTURA ATTUALE" : "DA RAGGIUNGERE");
                let colorStato = index < currentBeltIndex ? "#4ade80" : (index === currentBeltIndex ? "#f97316" : "#9ca3af");
                
                timelineHtml += `<div style="margin-bottom:10px; background:#374151; padding:10px; border-radius:6px; border-left:4px solid ${colorStato};">`;
