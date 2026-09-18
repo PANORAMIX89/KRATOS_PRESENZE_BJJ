@@ -120,16 +120,15 @@
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
         <h1 style="margin:0; font-size: 24px;">Dashboard Maestro</h1>
         <div style="display:flex; gap:10px;">
-           <button class="btn-main" style="padding: 10px 15px; width: auto; font-size: 14px;" onclick="apriConfigTarget()">TIME PROMO</button>
+           <button class="btn-main" style="padding: 10px 15px; width: auto; font-size: 14px;" onclick="apriConfigTarget()">PROMO TIME</button>
            <button class="btn-reset" style="padding: 10px 15px; width: auto; font-size: 14px;" onclick="esci()">Esci</button>
         </div>
       </div>
       
       <div class="tabs">
         <button class="tab-btn active" id="btnTab1" onclick="cambiaTab('vistaGiornaliera')">GIORNALIERA</button>
-        <button class="tab-btn" id="btnTab0" onclick="cambiaTab('vistaAtleti')">ATLETI</button>
-        <button class="tab-btn" id="btnTab2" onclick="cambiaTab('vistaAnnuale')">STATISTICHE</button>
-        <button class="tab-btn" id="btnTab3" onclick="cambiaTab('vistaPromozioni')">PROMO</button>
+        <button class="tab-btn" id="btnTab2" onclick="cambiaTab('vistaAtleti')">ATLETI</button>
+        <button class="tab-btn" id="btnTab3" onclick="cambiaTab('vistaPromozioni')">PROMOTION</button>
       </div>
 
       <div id="vistaAtleti" class="vista-tab hidden">
@@ -288,7 +287,7 @@
     <!-- Modale Configura Target -->
     <div id="modalConfigTarget" class="modal" style="display:none; justify-content:center; align-items:center;">
       <div class="modal-content" style="background:#1f2937; padding:20px; width:90%; max-width:400px; border: 2px solid #f97316; border-radius:12px;">
-         <h2 style="color:white; text-align:center; margin-top:0;">TIME PROMO (TARGET)</h2>
+         <h2 style="color:white; text-align:center; margin-top:0;">PROMO TIME (TARGET)</h2>
          
          <div style="display:flex; align-items:center; margin-bottom:10px;">
             <span class="belt-icon belt-BIANCA"></span> <span style="color:white; width:80px; margin-left:10px;">BIANCA:</span>
@@ -673,6 +672,8 @@
             document.getElementById('targetNERA').value = res.config.NERA;
             
             renderizzaListaPromo(res.atleti);
+            document.getElementById('loadingPromo').classList.add('hidden');
+            document.getElementById('contenutoPromo').classList.remove('hidden');
          }).getDatiPromozioneAvanzati();
       }
       

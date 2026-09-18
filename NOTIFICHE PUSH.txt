@@ -1,0 +1,36 @@
+Sì, puoi assolutamente inviare notifiche push agli smartphone, ma non direttamente tramite Google Apps Script da solo.
+
+Per inviare una notifica a un telefono (iOS o Android) serve un server intermediario certificato (APNs per Apple e FCM per Google). Il flusso standard funziona così:
+
+[Google Apps Script] ──(Richiesta HTTP)──> [Firebase Cloud Messaging (FCM)] ──> [Smartphone (Flutter / React Native)]
+Come funziona l'architettura
+1. Il ponte: Firebase Cloud Messaging (FCM)
+
+È il servizio gratuito di Google utilizzato per inviare notifiche push sia ad Android sia a iOS.
+
+Lo colleghi al tuo progetto in Flutter, React Native o FlutterFlow.
+
+2. Il token dell'utente
+
+Quando l'utente installa e apre l'app sullo smartphone, l'app genera un Device Token univoco (l'indirizzo identificativo di quel telefono).
+
+L'app invia questo token alla tua Web App (Apps Script), che lo salva su una colonna di un tuo Google Sheet.
+
+3. L'invio da Google Apps Script
+
+Quando si verifica un evento (es. un nuovo ordine, una modifica su un foglio, un timer automatico), Apps Script esegue una chiamata HTTP con UrlFetchApp.fetch() verso le API di FCM.
+
+FCM riceve la richiesta e consegna istantaneamente la notifica push allo smartphone dell'utente.
+
+I due tipi di notifiche che puoi usare
+Notifiche Push Remote (tramite FCM): Arrivano anche quando l'app è completamente chiusa o lo schermo è bloccato. Sono adatte per avvisi in tempo reale inviati dal tuo backend Apps Script (es. "Nuovo messaggio ricevuto", "Stato ordine aggiornato").
+
+Notifiche Locali: Vengono generate direttamente dal dispositivo senza passare da internet o da server (es. sveglie, promemoria a orario prefissato impostati dall'utente dentro l'app).
+
+Se scegli strumenti come FlutterFlow o Flutter, l'integrazione di Firebase Cloud Messaging è praticamente guidata e nativa.
+
+Come preferisci procedere?
+
+Mostra codice Apps Script per FCM
+
+Guida per FlutterFlow con Apps Script
