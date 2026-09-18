@@ -37,13 +37,12 @@
       /* PULSANTI E INPUT */
       .btn-login { width: 100%; padding: 15px; background-color: #f97316; color: #fff; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
       .btn-reset { width: 100%; padding: 15px; background-color: #9ca3af; color: #fff; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
-      .date-picker { padding: 6px; border: 1px solid #4b5563; background-color: #374151; color: white; border-radius: 5px; font-size: 14px; width: 100%; box-sizing: border-box; background-color: #fff; text-transform: uppercase; }
-      .mesi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #1f2937; padding: 15px; border: 1px solid #4b5563; background-color: #374151; color: white; border-radius: 5px; }
+      .date-picker { padding: 6px; border: 1px solid #4b5563; background-color: #374151; color: white; border-radius: 5px; font-size: 14px; width: 100%; box-sizing: border-box; text-transform: uppercase; }
+      .mesi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #1f2937; padding: 15px; border: 1px solid #4b5563; color: white; border-radius: 5px; }
       .mesi-grid label { display: flex; align-items: center; gap: 5px; font-size: 14px; cursor: pointer; }
       .mesi-grid input[type="checkbox"] { width: 18px; height: 18px; accent-color: #000; cursor: pointer; }
 
-      
-      .belt-icon { display: inline-block; width: 14px; height: 14px; border-radius: 2px; width: 22px; height: 10px; margin-left: 8px; vertical-align: middle; border: 1px solid #000; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+      .belt-icon { display: inline-block; width: 30px; height: 12px; border-radius: 2px; margin-left: 8px; vertical-align: middle; border: 1px solid #000; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
       .belt-BIANCA { background-color: #ffffff; }
       .belt-BLU { background-color: #2563eb; }
       .belt-VIOLA { background-color: #7c3aed; }
@@ -273,6 +272,7 @@
          <div style="text-align:center; margin-bottom:15px;">
             <img id="anagraficaImg" src="" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid #f97316; margin-bottom:10px; display:none;">
             <h2 id="anagraficaNome" style="color:white; margin:0; font-size:20px;"></h2>
+            <div id="anagraficaDataIscrizione" style="font-size:12px; color:#9ca3af; margin-top:2px;"></div>
             <div id="anagraficaCinturaContainer" style="margin-top:5px;"></div>
          </div>
          
@@ -391,8 +391,14 @@
       }
 
       
-      function apriAnagrafica(fotoUrl, nome, cintura) {
+      function apriAnagrafica(fotoUrl, nome, cintura, dataIscrizione) {
          document.getElementById('anagraficaNome').innerText = nome;
+         
+         if(dataIscrizione && dataIscrizione !== "--/--/----" && dataIscrizione !== "undefined") {
+            document.getElementById('anagraficaDataIscrizione').innerText = "Iscritto il: " + dataIscrizione;
+         } else {
+            document.getElementById('anagraficaDataIscrizione').innerText = "";
+         }
          
          if(fotoUrl) {
             document.getElementById('anagraficaImg').src = fotoUrl;
@@ -577,7 +583,7 @@
           li.className = 'atleta-item';
           
           let iniziali = (atleta.nome.split(' ').map(n=>n[0]).join('')).substring(0,2);
-          let avatarHtml = atleta.fotoUrl ? `<img src="${atleta.fotoUrl}" class="avatar" onclick="apriAnagrafica('${atleta.fotoUrl}', '${atleta.nome}', '${atleta.cintura}')">` : `<div class="avatar">${iniziali}</div>`;
+          let avatarHtml = atleta.fotoUrl ? `<img src="${atleta.fotoUrl}" class="avatar" onclick="apriAnagrafica('${atleta.fotoUrl}', '${atleta.nome}', '${atleta.cintura}', '${atleta.dataIscrizione}')">` : `<div class="avatar">${iniziali}</div>`;
           
           li.innerHTML = `
               <div class="atleta-info-wrapper">

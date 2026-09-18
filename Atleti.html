@@ -131,6 +131,24 @@
         });
       }
 
+      function toggleBeltDropdown() {
+        const dropdown = document.getElementById('beltDropdown');
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+      }
+
+      function selectBelt(beltName, beltColor) {
+        document.getElementById('nuovaCintura').value = beltName;
+        const visual = document.getElementById('selectedBeltVisual');
+        visual.innerHTML = `
+           <div style="display:flex; align-items:center;">
+              <span style="display:inline-block; width:30px; height:12px; border-radius:2px; background-color:${beltColor}; margin-right:10px; border:1px solid ${beltName==='NERA' ? '#555' : '#000'};"></span>
+              <span>${beltName}</span>
+           </div>
+           <span style="font-size:12px;">▼</span>
+        `;
+        document.getElementById('beltDropdown').style.display = 'none';
+      }
+
       function showView(viewId) {
         document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
         document.getElementById(viewId).classList.remove('hidden');

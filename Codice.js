@@ -109,8 +109,9 @@ function registraPresenza(nome) {
     }
     
     const dataOdierna = new Date();
-    const dataScritta = Utilities.formatDate(dataOdierna, Session.getScriptTimeZone(), "dd/MM/yyyy");
+    const dataScritta = Utilities.formatDate(dataOdierna, Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
     
+    const orario = Utilities.formatDate(dataOdierna, Session.getScriptTimeZone(), "HH:mm");
     const dati = foglioRegistro.getDataRange().getValues();
     for (let i = dati.length - 1; i >= 1; i--) {
       let dataRiga = dati[i][0];
@@ -130,8 +131,6 @@ function registraPresenza(nome) {
         return { isOk: false, message: `Ti sei già registrato oggi alle ore ${orarioTrovato}!` };
       }
     }
-    
-    const orario = Utilities.formatDate(dataOdierna, Session.getScriptTimeZone(), "HH:mm");
     
     const stato = "IN ATTESA";
     
@@ -359,6 +358,7 @@ function simulaPresenzeOggi() {
 
   nomi.forEach((nome, index) => {
     let oraCheckin = new Date(dataOdierna.getTime() - (index * 60000));
+    const dataScritta = Utilities.formatDate(oraCheckin, Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
     let orario = Utilities.formatDate(oraCheckin, Session.getScriptTimeZone(), "HH:mm");
     foglioRegistro.appendRow([dataScritta, orario, giornoSettimana, nome, "IN ATTESA"]);
   });
