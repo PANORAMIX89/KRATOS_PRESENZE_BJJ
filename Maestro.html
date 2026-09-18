@@ -253,7 +253,6 @@
            <div id="listaInPercorsoPromo" style="display:flex; flex-direction:column; gap:10px;"></div>
            
            <button class="btn-login" style="margin-top:20px;" onclick="apriModalPromo()">ASSEGNA NUOVA CINTURA</button>
-           <button class="btn-reset" style="margin-top:10px;" onclick="stampaReportPromo()">SCARICA REPORT STORICO</button>
         </div>
       </div>
 
@@ -773,25 +772,24 @@
                      </div>
                  </div>
              `;
+             let checked = atletiSelezionatiPromo.has(atleta.nome) ? 'checked' : '';
+             inner += `
+                <div style="display:flex; width:100%; margin-top:15px; gap:10px;">
+                   <button onclick="chiediRimanda('${atleta.nome}')" style="flex:1; padding:8px; background-color:#ef4444; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">RIMANDA</button>
+                   <label style="flex:2; display:flex; align-items:center; justify-content:center; background-color:#374151; border:1px solid #4ade80; border-radius:6px; padding:8px; cursor:pointer;">
+                      <input type="checkbox" class="promo-checkbox" style="margin-right:10px; width:18px; height:18px;" value="${atleta.nome}" onchange="togglePromoSelection(this)" ${checked}> 
+                      SELEZIONA PER PROMOZIONE
+                   </label>
+                </div>
+             `;
+             li.innerHTML = inner;
              
              if (atleta.idoneo) {
                  countIdonei++;
-                 let checked = atletiSelezionatiPromo.has(atleta.nome) ? 'checked' : '';
-                 inner += `
-                    <div style="display:flex; width:100%; margin-top:15px; gap:10px;">
-                       <button onclick="chiediRimanda('${atleta.nome}')" style="flex:1; padding:8px; background-color:#ef4444; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">RIMANDA</button>
-                       <label style="flex:2; display:flex; align-items:center; justify-content:center; background-color:#374151; border:1px solid #4ade80; border-radius:6px; padding:8px; cursor:pointer;">
-                          <input type="checkbox" class="promo-checkbox" style="margin-right:10px; width:18px; height:18px;" value="${atleta.nome}" onchange="togglePromoSelection(this)" ${checked}> 
-                          SELEZIONA PER PROMOZIONE
-                       </label>
-                    </div>
-                 `;
-                 li.innerHTML = inner;
                  li.style.borderLeft = "4px solid #4ade80";
                  containerIdonei.appendChild(li);
              } else {
                  countInPercorso++;
-                 li.innerHTML = inner;
                  containerInPercorso.appendChild(li);
              }
           });
