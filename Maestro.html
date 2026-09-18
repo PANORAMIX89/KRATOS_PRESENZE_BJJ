@@ -780,11 +780,22 @@
              let perc = Math.min(100, (atleta.presenzeDalGrado / atleta.targetTotale) * 100);
              let barColor = perc >= 100 ? '#4ade80' : '#f97316';
              
+             let checked = atletiSelezionatiPromo.has(atleta.nome) ? 'checked' : '';
+             
              let inner = `
                  <div class="atleta-info-wrapper" style="width:100%;">
                      ${avatarHtml}
                      <div class="atleta-nome" style="width:100%;">
-                         <strong style="display:block; margin-bottom:5px;">${atleta.nome} ${getBeltHtml(atleta.cintura)}</strong>
+                         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:5px;">
+                             <strong style="display:block;">${atleta.nome} ${getBeltHtml(atleta.cintura)}</strong>
+                             <div style="display:flex; gap:5px; align-items:center;">
+                                <button onclick="chiediRimanda('${atleta.nome}')" style="padding:4px 8px; background-color:#ef4444; color:white; border:none; border-radius:4px; font-weight:bold; font-size:10px; cursor:pointer;">RIMANDA</button>
+                                <label style="display:flex; align-items:center; background-color:#374151; border:1px solid #4ade80; border-radius:4px; padding:4px 8px; cursor:pointer; font-size:10px; color:white; font-weight:bold;">
+                                   <input type="checkbox" class="promo-checkbox" style="margin-right:5px; width:12px; height:12px; accent-color:#4ade80;" value="${atleta.nome}" onchange="togglePromoSelection(this)" ${checked}> 
+                                   PROMUOVI
+                                </label>
+                             </div>
+                         </div>
                          <div style="font-size:12px; color:#9ca3af; margin-bottom:5px;">Da: ${atleta.dataUltimaCintura} (${atleta.mesiTrascorsi} mesi) - Ultima: ${atleta.ultimoAllenamento}</div>
                          
                          <div style="width:100%; background-color:#4b5563; border-radius:4px; height:12px; overflow:hidden; position:relative; margin-bottom:5px;">
@@ -796,16 +807,6 @@
                          </div>
                      </div>
                  </div>
-             `;
-             let checked = atletiSelezionatiPromo.has(atleta.nome) ? 'checked' : '';
-             inner += `
-                <div style="display:flex; width:100%; margin-top:15px; gap:10px;">
-                   <button onclick="chiediRimanda('${atleta.nome}')" style="flex:1; padding:8px; background-color:#ef4444; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">RIMANDA</button>
-                   <label style="flex:2; display:flex; align-items:center; justify-content:center; background-color:#374151; border:1px solid #4ade80; border-radius:6px; padding:8px; cursor:pointer;">
-                      <input type="checkbox" class="promo-checkbox" style="margin-right:10px; width:18px; height:18px;" value="${atleta.nome}" onchange="togglePromoSelection(this)" ${checked}> 
-                      SELEZIONA PER PROMOZIONE
-                   </label>
-                </div>
              `;
              li.innerHTML = inner;
              
