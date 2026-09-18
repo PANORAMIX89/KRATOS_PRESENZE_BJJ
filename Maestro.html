@@ -548,15 +548,31 @@
                let eventiBelt = res.storico ? res.storico.filter(e => e.cintura === belt) : [];
                let targetBase = res.targetCinture ? (res.targetCinture[belt] || 0) : 0;
                
-               let stato = index < currentBeltIndex ? "CONSEGUITA" : (index === currentBeltIndex ? "CINTURA ATTUALE" : "DA RAGGIUNGERE");
-               let colorStato = index < currentBeltIndex ? "#4ade80" : (index === currentBeltIndex ? "#f97316" : "#9ca3af");
+               let isAttuale = (index === currentBeltIndex);
+               let isPassata = (index < currentBeltIndex);
+               let stato = isPassata ? "CONSEGUITA" : (isAttuale ? "CINTURA ATTUALE" : "DA RAGGIUNGERE");
+               let colorStato = isPassata ? "#4ade80" : (isAttuale ? "#f97316" : "#9ca3af");
+               
+               let detailsHtml = "";
+               if (isAttuale) {
+                   detailsHtml = `<div style="font-size:12px; color:#d1d5db;">Target: ${targetBase} lezioni</div>`;
+               } else if (isPassata) {
+                   // Cerca evento promozione per trovare la data
+                   let promoEvent = eventiBelt.find(e => e.evento.toUpperCase().includes("PROMO"));
+                   let dataPromo = promoEvent ? promoEvent.data : "";
+                   if (dataPromo) {
+                       detailsHtml = `<div style="font-size:12px; color:#4ade80;">Data di conseguimento: ${dataPromo}</div>`;
+                   } else {
+                       detailsHtml = `<div style="font-size:12px; color:#4ade80;">Cintura superata</div>`;
+                   }
+               }
                
                timelineHtml += `<div style="margin-bottom:10px; background:#374151; padding:10px; border-radius:6px; border-left:4px solid ${colorStato};">`;
                timelineHtml += `<div style="display:flex; align-items:center;">
                                    <div style="margin-right:10px;">${getBeltHtml(belt)}</div>
                                    <div style="flex-grow:1; text-align:left;">
                                       <div style="font-weight:bold; color:white;">${belt} <span style="font-size:11px; color:${colorStato};">(${stato})</span></div>
-                                      <div style="font-size:12px; color:#d1d5db;">Target Base: ${targetBase} lezioni</div>
+                                      ${detailsHtml}
                                    </div>
                                 </div>`;
                

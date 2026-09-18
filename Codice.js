@@ -938,7 +938,8 @@ function getDatiPromozioneAvanzati() {
 // Sostituisco la vecchia getAnagraficaAtleta per sfruttare i nuovi calcoli VELOCI per un singolo atleta
 function getAnagraficaAvanzata(nome) {
    try {
-       const nomeUpper = nome.toUpperCase();
+       if (!nome) return { error: "Nome atleta non fornito", presenzeTotali: 0, storico: [], statsAvanzate: null };
+       const nomeUpper = String(nome).trim().toUpperCase();
        const ss = SpreadsheetApp.openById(ID_FOGLIO);
        
        const foglioAtleti = ss.getSheetByName("ATLETI");
