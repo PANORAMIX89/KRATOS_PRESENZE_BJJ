@@ -307,12 +307,32 @@ function riapriClasse(dataSelezionataTesto) {
   for (let i = 1; i < datiRegistro.length; i++) {
     if (!datiRegistro[i][0]) continue; 
     
-    const dataCompleta = new Date(datiRegistro[i][0]);
-    const dataRiga = Utilities.formatDate(dataCompleta, Session.getScriptTimeZone(), "yyyy-MM-dd");
+    let rawData = datiRegistro[i][0];
+    let strDataRiga = "";
     
-    if (dataRiga === dataSelezionataTesto) {
+    if (rawData instanceof Date) {
+       strDataRiga = Utilities.formatDate(rawData, Session.getScriptTimeZone(), "yyyy-MM-dd");
+    } else {
+       let strDate = rawData.toString().trim();
+       let matchStr = strDate.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+       if (matchStr) {
+           let gg = matchStr[1].padStart(2, '0');
+           let mm = matchStr[2].padStart(2, '0');
+           let aaaa = matchStr[3];
+           strDataRiga = `${aaaa}-${mm}-${gg}`;
+       } else {
+           let d = new Date(strDate);
+           if (!isNaN(d.getTime())) {
+               strDataRiga = Utilities.formatDate(d, Session.getScriptTimeZone(), "yyyy-MM-dd");
+           } else {
+               continue;
+           }
+       }
+    }
+    
+    if (strDataRiga === dataSelezionataTesto) {
       let esito = datiRegistro[i][4];
-      if (esito && (esito.startsWith("OK REGISTRAZIONE") || esito === "FURBETTO")) {
+      if (esito && (String(esito).startsWith("OK REGISTRAZIONE") || String(esito) === "FURBETTO")) {
         foglioRegistro.getRange(i + 1, 5).setValue("IN ATTESA");
       }
     }
