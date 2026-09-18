@@ -642,6 +642,11 @@
         document.getElementById('loadingDash').classList.add('hidden');
         document.getElementById('contenutoDash').classList.remove('hidden');
         
+        if (dati.error) {
+           mostraNotifica("ERRORE: " + dati.error, 'error');
+           return;
+        }
+        
         const ulInAttesa = document.getElementById('listaInAttesa');
         const ulPartecipanti = document.getElementById('listaPartecipanti');
         const ulFurbetti = document.getElementById('listaFurbetti');

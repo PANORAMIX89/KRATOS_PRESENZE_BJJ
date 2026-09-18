@@ -210,42 +210,47 @@ function verificaPin(pinInserito) {
 }
 
 function getDatiGiorno(dataSelezionataTesto) {
-  const ss = SpreadsheetApp.openById(ID_FOGLIO);
-  const datiRegistro = ss.getSheetByName("REGISTRO GREZZO").getDataRange().getValues();
-  const atletiSalvati = getAtleti(); 
-  let partecipanti = [], furbetti = [], inAttesa = [];
-  
-  for (let i = 1; i < datiRegistro.length; i++) {
-    if (!datiRegistro[i][0]) continue; 
+  try {
+    const ss = SpreadsheetApp.openById(ID_FOGLIO);
+    const datiRegistro = ss.getSheetByName("REGISTRO GREZZO").getDataRange().getValues();
+    const atletiSalvati = getAtleti(); 
+    let partecipanti = [], furbetti = [], inAttesa = [];
     
-    const dataCompleta = new Date(datiRegistro[i][0]);
-    const dataRiga = Utilities.formatDate(dataCompleta, Session.getScriptTimeZone(), "yyyy-MM-dd");
-    
-    if (dataRiga === dataSelezionataTesto) {
-      let orarioCheckin = datiRegistro[i][1];
-      if (orarioCheckin instanceof Date) {
-        orarioCheckin = Utilities.formatDate(orarioCheckin, Session.getScriptTimeZone(), "HH:mm");
-      } else if (!orarioCheckin) {
-        orarioCheckin = Utilities.formatDate(dataCompleta, Session.getScriptTimeZone(), "HH:mm");
-      }
+    for (let i = 1; i < datiRegistro.length; i++) {
+      if (!datiRegistro[i][0]) continue; 
       
-      const nomeAtleta = datiRegistro[i][3]; 
-      const esito = datiRegistro[i][4];      
+      const dataCompleta = new Date(datiRegistro[i][0]);
+      if (isNaN(dataCompleta.getTime())) continue; // Salta righe con date invalide
+      const dataRiga = Utilities.formatDate(dataCompleta, Session.getScriptTimeZone(), "yyyy-MM-dd");
       
-      let atletaTrovato = atletiSalvati.find(a => a.nome === nomeAtleta.toUpperCase());
-      let foto = atletaTrovato ? atletaTrovato.fotoUrl : "";
-      let cintura = atletaTrovato ? atletaTrovato.cintura : "BIANCA";
-      
-      if (esito === "IN ATTESA") {
-        inAttesa.push({nome: nomeAtleta, foto: foto, cintura: cintura, orario: orarioCheckin, riga: i + 1});
-      } else if (esito.startsWith("OK REGISTRAZIONE")) {
-        partecipanti.push({nome: nomeAtleta, foto: foto, cintura: cintura, orario: orarioCheckin});
-      } else {
-        furbetti.push({nome: nomeAtleta, foto: foto, cintura: cintura, orario: orarioCheckin});
+      if (dataRiga === dataSelezionataTesto) {
+        let orarioCheckin = datiRegistro[i][1];
+        if (orarioCheckin instanceof Date) {
+          orarioCheckin = Utilities.formatDate(orarioCheckin, Session.getScriptTimeZone(), "HH:mm");
+        } else if (!orarioCheckin) {
+          orarioCheckin = Utilities.formatDate(dataCompleta, Session.getScriptTimeZone(), "HH:mm");
+        }
+        
+        const nomeAtleta = String(datiRegistro[i][3] || "").trim(); 
+        const esito = String(datiRegistro[i][4] || "");      
+        
+        let atletaTrovato = atletiSalvati.find(a => a.nome === nomeAtleta.toUpperCase());
+        let foto = atletaTrovato ? atletaTrovato.fotoUrl : "";
+        let cintura = atletaTrovato ? atletaTrovato.cintura : "BIANCA";
+        
+        if (esito === "IN ATTESA") {
+          inAttesa.push({nome: nomeAtleta, foto: foto, cintura: cintura, orario: orarioCheckin, riga: i + 1});
+        } else if (esito.startsWith("OK REGISTRAZIONE")) {
+          partecipanti.push({nome: nomeAtleta, foto: foto, cintura: cintura, orario: orarioCheckin});
+        } else {
+          furbetti.push({nome: nomeAtleta, foto: foto, cintura: cintura, orario: orarioCheckin});
+        }
       }
     }
+    return { inAttesa, partecipanti, furbetti };
+  } catch (e) {
+    return { error: e.toString() };
   }
-  return { inAttesa, partecipanti, furbetti };
 }
 
 function ufficializzaPresenze(righeConfermati, righeFurbetti) {
