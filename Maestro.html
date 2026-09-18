@@ -402,6 +402,11 @@
          document.getElementById('modalAnagrafica').style.display = 'flex';
          
          google.script.run.withSuccessHandler(res => {
+            if (res.error) {
+                alert("ERRORE SUL SERVER: " + res.error);
+                document.getElementById('modalAnagrafica').style.display = 'none';
+                return;
+            }
 
             if (res.statsAvanzate) {
                let a = res.statsAvanzate;
@@ -588,6 +593,12 @@
          document.getElementById('loadingPromo').classList.remove('hidden');
          document.getElementById('contenutoPromo').classList.add('hidden');
          google.script.run.withSuccessHandler(res => {
+            if (res.error) {
+                alert("ERRORE SUL SERVER: " + res.error);
+                document.getElementById('loadingPromo').classList.add('hidden');
+                document.getElementById('contenutoPromo').classList.remove('hidden');
+                return;
+            }
             databasePromoGlobale = res.atleti;
             
             // Popola gli input di configurazione

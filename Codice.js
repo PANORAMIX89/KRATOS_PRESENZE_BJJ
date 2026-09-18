@@ -725,158 +725,167 @@ function rimandaAtleta(nome, lezioniExtra) {
   return { success: true, message: "Atleta rimandato. Aggiunte " + lezioniExtra + " lezioni al target." };
 }
 
-// Sostituiamo la logica in getDatiPromozione per includere i target e gli idonei
 function getDatiPromozioneAvanzati() {
-  const ss = SpreadsheetApp.openById(ID_FOGLIO);
-  const atletiDati = ss.getSheetByName("ATLETI").getDataRange().getValues();
-  const storicoDati = ss.getSheetByName("STORICO CINTURE").getDataRange().getValues();
-  const registroDati = ss.getSheetByName("REGISTRO GREZZO").getDataRange().getValues();
-  
-  const targetCinture = getConfigurazioniCinture();
-  
-  // 1. Mappiamo lo storico per ogni atleta per trovare la data dell'ULTIMA promozione
-  //    e per sommare le lezioni extra dei RIMANDATI avvenuti DOPO quell'ultima promozione.
-  const mapUltimaPromozione = {}; // nome -> data ultima promozione
-  const mapLezioniExtra = {};     // nome -> somma lezioni extra
-  
-  for (let i = 3; i < storicoDati.length; i++) {
-    const nome = storicoDati[i][0] ? storicoDati[i][0].toString().toUpperCase().trim() : "";
-    if (!nome) continue;
+  try {
+    const ss = SpreadsheetApp.openById(ID_FOGLIO);
+    const atletiDati = ss.getSheetByName("ATLETI").getDataRange().getValues();
+    const storicoDati = ss.getSheetByName("STORICO CINTURE").getDataRange().getValues();
+    const registroDati = ss.getSheetByName("REGISTRO GREZZO").getDataRange().getValues();
     
-    let dataVal = storicoDati[i][1];
-    let dateObj = null;
-    if (dataVal) {
-      if (dataVal instanceof Date) { dateObj = dataVal; } 
-      else {
-         let p = dataVal.toString().split("/");
-         if (p.length === 3) dateObj = new Date(p[2], p[1]-1, p[0]);
+    const targetCinture = getConfigurazioniCinture();
+    
+    const mapUltimaPromozione = {}; 
+    const mapLezioniExtra = {};     
+    
+    for (let i = 3; i < storicoDati.length; i++) {
+      const nome = storicoDati[i][0] ? storicoDati[i][0].toString().toUpperCase().trim() : "";
+      if (!nome) continue;
+      
+      let dataVal = storicoDati[i][1];
+      let dateObj = null;
+      if (dataVal) {
+        if (dataVal instanceof Date) { dateObj = dataVal; } 
+        else {
+           let p = dataVal.toString().split("/");
+           if (p.length === 3) dateObj = new Date(p[2], p[1]-1, p[0]);
+        }
+      }
+      if(!dateObj) dateObj = new Date(0);
+      
+      let tipoEvento = storicoDati[i][3] ? storicoDati[i][3].toString().toUpperCase().trim() : "";
+      let lezioniExtra = parseInt(storicoDati[i][4]) || 0; 
+      
+      if (tipoEvento === "PROMOZIONE" || tipoEvento === "ISCRIZIONE") {
+         if (!mapUltimaPromozione[nome] || dateObj >= mapUltimaPromozione[nome]) {
+             mapUltimaPromozione[nome] = dateObj;
+             mapLezioniExtra[nome] = 0; 
+         }
+      } else if (tipoEvento === "RIMANDATO") {
+         if (!mapUltimaPromozione[nome]) mapUltimaPromozione[nome] = new Date(0);
+         if (!mapLezioniExtra[nome]) mapLezioniExtra[nome] = 0;
+         if (dateObj >= mapUltimaPromozione[nome]) {
+             mapLezioniExtra[nome] += lezioniExtra;
+         }
       }
     }
-    if(!dateObj) dateObj = new Date(0);
-    
-    let tipoEvento = storicoDati[i][3] ? storicoDati[i][3].toString().toUpperCase().trim() : "";
-    let lezioniExtra = parseInt(storicoDati[i][4]) || 0; // Colonna E
-    
-    if (tipoEvento === "PROMOZIONE" || tipoEvento === "ISCRIZIONE") {
-       // Reset se è una nuova promozione!
-       if (!mapUltimaPromozione[nome] || dateObj >= mapUltimaPromozione[nome]) {
-           mapUltimaPromozione[nome] = dateObj;
-           mapLezioniExtra[nome] = 0; // Azzera i malus precedenti!
-       }
-    } else if (tipoEvento === "RIMANDATO") {
-       if (!mapUltimaPromozione[nome]) mapUltimaPromozione[nome] = new Date(0);
-       if (!mapLezioniExtra[nome]) mapLezioniExtra[nome] = 0;
-       if (dateObj >= mapUltimaPromozione[nome]) {
-           mapLezioniExtra[nome] += lezioniExtra;
-       }
-    }
-  }
 
-  // 2. Calcoliamo le presenze di ogni atleta DALLA data della sua ultima promozione
-  const mapPresenze = {}; // nome -> { tot: 0, ultimoAllenamento: data }
-  for (let i = 1; i < registroDati.length; i++) {
-    const esito = registroDati[i][4] ? registroDati[i][4].toString() : "";
-    if (!esito.startsWith("OK REGISTRAZIONE")) continue;
-    
-    const nome = registroDati[i][3] ? registroDati[i][3].toString().toUpperCase().trim() : "";
-    if (!nome) continue;
-    
-    let dataReg = registroDati[i][0];
-    let dateObj = null;
-    if (dataReg instanceof Date) dateObj = dataReg;
-    else {
-       let strDate = dataReg.toString().trim();
-       let matchStr = strDate.match(/(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/);
-       if (matchStr) {
-          let p = matchStr[0].split(/[/-]/);
-          dateObj = new Date(p[2], p[1]-1, p[0]);
-       }
-    }
-    
-    if (dateObj) {
-      if (!mapPresenze[nome]) mapPresenze[nome] = { tot: 0, ultimoAllenamento: null };
-      let dataInizio = mapUltimaPromozione[nome] || new Date(0);
-      if (dateObj >= dataInizio) {
-        mapPresenze[nome].tot++;
-        if (!mapPresenze[nome].ultimoAllenamento || dateObj > mapPresenze[nome].ultimoAllenamento) {
-            mapPresenze[nome].ultimoAllenamento = dateObj;
+    const mapPresenze = {}; 
+    for (let i = 1; i < registroDati.length; i++) {
+      const esito = registroDati[i][4] ? registroDati[i][4].toString() : "";
+      if (!esito.startsWith("OK REGISTRAZIONE")) continue;
+      
+      const nome = registroDati[i][3] ? registroDati[i][3].toString().toUpperCase().trim() : "";
+      if (!nome) continue;
+      
+      let dataReg = registroDati[i][0];
+      let dateObj = null;
+      if (dataReg instanceof Date) dateObj = dataReg;
+      else {
+         let strDate = dataReg.toString().trim();
+         let matchStr = strDate.match(/(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/);
+         if (matchStr) {
+            let p = matchStr[0].split(/[/-]/);
+            dateObj = new Date(p[2], p[1]-1, p[0]);
+         }
+      }
+      
+      if (dateObj) {
+        if (!mapPresenze[nome]) mapPresenze[nome] = { tot: 0, ultimoAllenamento: null };
+        let dataInizio = mapUltimaPromozione[nome] || new Date(0);
+        if (dateObj >= dataInizio) {
+          mapPresenze[nome].tot++;
+          if (!mapPresenze[nome].ultimoAllenamento || dateObj > mapPresenze[nome].ultimoAllenamento) {
+              mapPresenze[nome].ultimoAllenamento = dateObj;
+          }
         }
       }
     }
-  }
-  
-  // 3. Prepariamo i risultati
-  const risultati = [];
-  const oggi = new Date();
-  
-  for (let i = 3; i < atletiDati.length; i++) {
-    const nome = atletiDati[i][0] ? atletiDati[i][0].toString().toUpperCase().trim() : "";
-    if (!nome) continue;
     
-    let foto = "";
-    if (atletiDati[i][1]) {
-      const match = atletiDati[i][1].toString().match(/\/d\/([-\w]{25,})/);
-      foto = match ? "https://drive.google.com/thumbnail?id=" + match[1] + "&sz=w400" : atletiDati[i][1];
-    }
+    const risultati = [];
+    const oggi = new Date();
     
-    let cintura = atletiDati[i][3] ? atletiDati[i][3].toString().toUpperCase().trim() : "BIANCA";
-    let dataUltima = mapUltimaPromozione[nome];
-    
-    let strDataUltima = "--/--/----";
-    let mesiPassati = 0;
-    if (dataUltima && dataUltima.getTime() > 0) {
-       strDataUltima = Utilities.formatDate(dataUltima, Session.getScriptTimeZone(), "dd/MM/yyyy");
-       let diffTime = Math.abs(oggi - dataUltima);
-       mesiPassati = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 30.416)); 
-    }
-    
-    let datiPres = mapPresenze[nome] || { tot: 0, ultimoAllenamento: null };
-    let lezioniFatte = datiPres.tot;
-    let targetBase = targetCinture[cintura] || 100;
-    let malus = mapLezioniExtra[nome] || 0;
-    let targetTotale = targetBase + malus;
-    
-    let strUltimoAllenamento = "--/--/----";
-    if (datiPres.ultimoAllenamento) {
-       strUltimoAllenamento = Utilities.formatDate(datiPres.ultimoAllenamento, Session.getScriptTimeZone(), "dd/MM/yyyy");
+    let dataStart = 3;
+    for(let i=0; i<atletiDati.length; i++) {
+       if(atletiDati[i][0] && atletiDati[i][0].toString().trim().toUpperCase() === "NOME E COGNOME") {
+           dataStart = i + 1;
+           break;
+       }
     }
 
-    risultati.push({
-       nome: nome,
-       fotoUrl: foto,
-       cintura: cintura,
-       dataUltimaCintura: strDataUltima,
-       mesiTrascorsi: mesiPassati,
-       presenzeDalGrado: lezioniFatte,
-       targetBase: targetBase,
-       malus: malus,
-       targetTotale: targetTotale,
-       idoneo: lezioniFatte >= targetTotale,
-       ultimoAllenamento: strUltimoAllenamento
+    for (let i = dataStart; i < atletiDati.length; i++) {
+      const nome = atletiDati[i][0] ? atletiDati[i][0].toString().toUpperCase().trim() : "";
+      if (!nome) continue;
+      
+      let foto = "";
+      if (atletiDati[i][1]) {
+        const match = atletiDati[i][1].toString().match(/\/d\/([-\w]{25,})/);
+        foto = match ? "https://drive.google.com/thumbnail?id=" + match[1] + "&sz=w400" : atletiDati[i][1];
+      }
+      
+      let cintura = atletiDati[i][3] ? atletiDati[i][3].toString().toUpperCase().trim() : "BIANCA";
+      let dataUltima = mapUltimaPromozione[nome];
+      
+      let strDataUltima = "--/--/----";
+      let mesiPassati = 0;
+      if (dataUltima && dataUltima.getTime() > 0) {
+         strDataUltima = Utilities.formatDate(dataUltima, Session.getScriptTimeZone(), "dd/MM/yyyy");
+         let diffTime = Math.abs(oggi - dataUltima);
+         mesiPassati = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 30.416)); 
+      }
+      
+      let datiPres = mapPresenze[nome] || { tot: 0, ultimoAllenamento: null };
+      let lezioniFatte = datiPres.tot;
+      let targetBase = targetCinture[cintura] || 100;
+      let malus = mapLezioniExtra[nome] || 0;
+      let targetTotale = targetBase + malus;
+      
+      let strUltimoAllenamento = "--/--/----";
+      if (datiPres.ultimoAllenamento) {
+         strUltimoAllenamento = Utilities.formatDate(datiPres.ultimoAllenamento, Session.getScriptTimeZone(), "dd/MM/yyyy");
+      }
+
+      risultati.push({
+         nome: nome,
+         fotoUrl: foto,
+         cintura: cintura,
+         dataUltimaCintura: strDataUltima,
+         mesiTrascorsi: mesiPassati,
+         presenzeDalGrado: lezioniFatte,
+         targetBase: targetBase,
+         malus: malus,
+         targetTotale: targetTotale,
+         idoneo: lezioniFatte >= targetTotale,
+         ultimoAllenamento: strUltimoAllenamento
+      });
+    }
+    
+    risultati.sort((a,b) => {
+       if (a.idoneo && !b.idoneo) return -1;
+       if (!a.idoneo && b.idoneo) return 1;
+       if (a.idoneo && b.idoneo) {
+           return (b.presenzeDalGrado - b.targetTotale) - (a.presenzeDalGrado - a.targetTotale);
+       }
+       let percA = a.targetTotale > 0 ? (a.presenzeDalGrado / a.targetTotale) : 0;
+       let percB = b.targetTotale > 0 ? (b.presenzeDalGrado / b.targetTotale) : 0;
+       return percB - percA;
     });
+    
+    return { atleti: risultati, config: targetCinture };
+  } catch(e) {
+    return { error: e.toString(), atleti: [], config: {} };
   }
-  
-  // Ordiniamo: Idonei in alto (ordinati per surplus di lezioni), poi gli altri ordinati per percentuale di completamento
-  risultati.sort((a,b) => {
-     if (a.idoneo && !b.idoneo) return -1;
-     if (!a.idoneo && b.idoneo) return 1;
-     if (a.idoneo && b.idoneo) {
-         return (b.presenzeDalGrado - b.targetTotale) - (a.presenzeDalGrado - a.targetTotale);
-     }
-     let percA = a.targetTotale > 0 ? (a.presenzeDalGrado / a.targetTotale) : 0;
-     let percB = b.targetTotale > 0 ? (b.presenzeDalGrado / b.targetTotale) : 0;
-     return percB - percA;
-  });
-  
-  return { atleti: risultati, config: targetCinture };
 }
 
 // Sostituisco la vecchia getAnagraficaAtleta per sfruttare i nuovi calcoli
 function getAnagraficaAvanzata(nome) {
-   let dati = getDatiPromozioneAvanzati();
-   let atleta = dati.atleti.find(a => a.nome.toUpperCase() === nome.toUpperCase());
-   
-   // Prendo lo storico
+   try {
+       let dati = getDatiPromozioneAvanzati();
+       if (dati.error) {
+           return { error: dati.error, presenzeTotali: 0, storico: [], statsAvanzate: null };
+       }
+       let atleta = dati.atleti.find(a => a.nome.toUpperCase() === nome.toUpperCase());
+       
+       // Prendo lo storico
    const ss = SpreadsheetApp.openById(ID_FOGLIO);
    const foglioStorico = ss.getSheetByName("STORICO CINTURE");
    const storico = [];
@@ -910,13 +919,16 @@ function getAnagraficaAvanzata(nome) {
      }
    }
    
-   if (!atleta) {
-       return { presenzeTotali: 0, storico: storico, statsAvanzate: null };
+       if (!atleta) {
+           return { presenzeTotali: 0, storico: storico, statsAvanzate: null };
+       }
+       
+       return {
+           presenzeTotali: atleta.presenzeDalGrado, 
+           storico: storico,
+           statsAvanzate: atleta
+       };
+   } catch (e) {
+       return { error: e.toString(), presenzeTotali: 0, storico: [], statsAvanzate: null };
    }
-   
-   return {
-       presenzeTotali: atleta.presenzeDalGrado, // Non è il totale di sempre ma dal grado
-       storico: storico,
-       statsAvanzate: atleta
-   };
 }
