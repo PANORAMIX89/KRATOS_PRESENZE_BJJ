@@ -488,6 +488,7 @@
          document.getElementById('anagraficaTimeline').innerHTML = '<div class="loader-container"><div class="loader"></div></div>';
          
          document.getElementById('modalAnagrafica').style.display = 'flex';
+         document.body.style.overflow = 'hidden'; // Prevents background scrolling
          
          google.script.run.withSuccessHandler(res => {
             if (res.error) {
@@ -591,16 +592,19 @@
       
       function chiudiAnagrafica() {
          document.getElementById('modalAnagrafica').style.display = 'none';
+         document.body.style.overflow = ''; // Restore background scrolling
       }
 
       function apriModal(url, nome) {
         document.getElementById('zoomImg').src = url;
         document.getElementById('zoomNome').innerText = nome;
         document.getElementById('modalZoom').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
       }
 
       function chiudiModal() {
         document.getElementById('modalZoom').style.display = 'none';
+        document.body.style.overflow = '';
       }
 
       function resetFiltri() {
@@ -765,21 +769,25 @@
       
       function apriConfigTarget() {
          document.getElementById('modalConfigTarget').style.display = 'flex';
+         document.body.style.overflow = 'hidden';
       }
       function chiudiConfigTarget() {
          document.getElementById('modalConfigTarget').style.display = 'none';
+         document.body.style.overflow = '';
       }
       
       let atletaDaRimandare = "";
       function chiediRimanda(nome) {
          atletaDaRimandare = nome;
          document.getElementById('rimandaNome').innerText = nome;
-         document.getElementById('rimandaExtra').value = "10";
+         document.getElementById('rimandaExtra').value = "5";
          document.getElementById('rimandaNote').value = "";
          document.getElementById('modalRimanda').style.display = 'flex';
+         document.body.style.overflow = 'hidden';
       }
       function chiudiModalRimanda() {
          document.getElementById('modalRimanda').style.display = 'none';
+         document.body.style.overflow = '';
       }
       
       function confermaRimanda() {
@@ -932,10 +940,12 @@
          });
          
          document.getElementById('modalPromo').style.display = 'flex';
+         document.body.style.overflow = 'hidden';
       }
       
       function chiudiModalPromo() {
          document.getElementById('modalPromo').style.display = 'none';
+         document.body.style.overflow = '';
       }
       
       function confermaPromozioni() {
@@ -1092,10 +1102,12 @@
 
       function mostraModalRiapertura() {
         document.getElementById('modalConfermaRiapertura').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
       }
 
       function chiudiModalRiapertura() {
         document.getElementById('modalConfermaRiapertura').classList.add('hidden');
+        document.body.style.overflow = '';
       }
 
       function confermaRiapertura() {
