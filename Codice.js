@@ -365,7 +365,11 @@ function getStatisticheAnnuali(anno, mesi, nome) {
   const atletiSalvati = getAtleti();
   
   const dizionarioFoto = {};
-  atletiSalvati.forEach(a => dizionarioFoto[a.nome] = a.fotoUrl);
+  const dizionarioCintura = {};
+  atletiSalvati.forEach(a => {
+    dizionarioFoto[a.nome] = a.fotoUrl;
+    dizionarioCintura[a.nome] = a.cintura || "BIANCA";
+  });
   
   const risultati = [];
   for (let i = 1; i < datiRegistro.length; i++) {
@@ -413,7 +417,8 @@ function getStatisticheAnnuali(anno, mesi, nome) {
         ora: ora,
         giorno: giorno,
         nome: nomeAtleta,
-        foto: dizionarioFoto[nomeAtleta] || ""
+        foto: dizionarioFoto[nomeAtleta] || "",
+        cintura: dizionarioCintura[nomeAtleta] || "BIANCA"
       });
     }
   }
@@ -450,7 +455,7 @@ function promuoviAtleti(promozioni) {
       const note = promo.note ? promo.note.toUpperCase() : "";
       
       // 1. Salva nello Storico
-      foglioStorico.appendRow([nomeAtleta, dataOdierna, nuovaCintura, "PROMOZIONE", note]);
+      foglioStorico.appendRow([nomeAtleta, dataOdierna, nuovaCintura, "PROMOZIONE", "", note]);
       
       // 2. Aggiorna cintura in ATLETI (colonna D, indice 3)
       for (let i = 3; i < atletiDati.length; i++) {
@@ -1028,39 +1033,39 @@ function getAnagraficaAvanzata(nome) {
 }
 
 
-function SVUOTA_DATABASE() {
+function SVUOTA_DB() {
   const ss = SpreadsheetApp.openById(ID_FOGLIO);
-  
-  // Funzione di supporto per cancellare i dati mantenendo le formule
-  function clearKeepFormulas(sheet, startRow, startCol, numRows, numCols) {
-    if (!sheet || numRows <= 0 || numCols <= 0) return;
-    const range = sheet.getRange(startRow, startCol, numRows, numCols);
-    const formulas = range.getFormulas();
-    range.clearContent();
-    range.setFormulas(formulas);
-  }
-  
+
+  // ===== ATLETI: righe 1-3 intestazioni, dati da riga 4 =====
   const foglioAtleti = ss.getSheetByName("ATLETI");
   if (foglioAtleti && foglioAtleti.getLastRow() > 3) {
-    clearKeepFormulas(foglioAtleti, 4, 1, foglioAtleti.getLastRow() - 3, 5);
-  }
-  
-  const foglioRegistro = ss.getSheetByName("REGISTRO GREZZO");
-  if (foglioRegistro && foglioRegistro.getLastRow() > 1) {
-    clearKeepFormulas(foglioRegistro, 2, 1, foglioRegistro.getLastRow() - 1, 5);
-  }
-  
-  const foglioStorico = ss.getSheetByName("STORICO CINTURE");
-  if (foglioStorico && foglioStorico.getLastRow() > 1) {
-    clearKeepFormulas(foglioStorico, 2, 1, foglioStorico.getLastRow() - 1, 6);
-  }
-  
-  const foglioDash = ss.getSheetByName("DASHBOARD ANNUALE");
-  if (foglioDash && foglioDash.getLastRow() > 5) {
-    clearKeepFormulas(foglioDash, 6, 3, foglioDash.getLastRow() - 5, 6);
+    foglioAtleti.getRange(4, 1, foglioAtleti.getLastRow() - 3, foglioAtleti.getLastColumn()).clearContent();
   }
 
-  // Cancella foto su Drive
+  // ===== REGISTRO GREZZO: riga 1 intestazione, dati da riga 2 =====
+  const foglioRegistro = ss.getSheetByName("REGISTRO GREZZO");
+  if (foglioRegistro && foglioRegistro.getLastRow() > 1) {
+    foglioRegistro.getRange(2, 1, foglioRegistro.getLastRow() - 1, foglioRegistro.getLastColumn()).clearContent();
+  }
+
+  // ===== STORICO CINTURE: BACKUP INTESTAZIONI, PULISCI, RIPRISTINA =====
+  const foglioStorico = ss.getSheetByName("STORICO CINTURE");
+  if (foglioStorico && foglioStorico.getLastRow() > 0) {
+    // Salva TUTTE le righe fino alla riga 3 (intestazioni)
+    const numColStorico = foglioStorico.getLastColumn() || 6;
+    const righeIntestazione = Math.min(foglioStorico.getLastRow(), 3);
+    const backupHeaders = foglioStorico.getRange(1, 1, righeIntestazione, numColStorico).getValues();
+    const backupFormats = foglioStorico.getRange(1, 1, righeIntestazione, numColStorico).getNumberFormats();
+    
+    // Pulisci TUTTO il contenuto del foglio
+    foglioStorico.getDataRange().clearContent();
+    
+    // Ripristina le intestazioni salvate
+    foglioStorico.getRange(1, 1, righeIntestazione, numColStorico).setValues(backupHeaders);
+    foglioStorico.getRange(1, 1, righeIntestazione, numColStorico).setNumberFormats(backupFormats);
+  }
+
+  // ===== CANCELLA FOTO DALLA CARTELLA DRIVE =====
   try {
     const folder = DriveApp.getFolderById("1DoBG3xKvEFnO31Oxw9zCbwhiecdhH0w-");
     const files = folder.getFiles();
@@ -1068,6 +1073,6 @@ function SVUOTA_DATABASE() {
       files.next().setTrashed(true);
     }
   } catch (e) {}
-  
-  return "DATABASE SVUOTATO CON SUCCESSO. FORMULE MANTENUTE. FOTO ELIMINATE.";
+
+  return "SVUOTA_DB COMPLETATO: ATLETI, REGISTRO GREZZO, STORICO CINTURE SVUOTATI. FOTO ELIMINATE. INTESTAZIONI INTATTE.";
 }
