@@ -706,7 +706,7 @@
           li.className = 'atleta-item';
           
           let iniziali = (atleta.nome.split(' ').map(n=>n[0]).join('')).substring(0,2);
-          let avatarHtml = atleta.fotoUrl ? `<img src="${atleta.fotoUrl}" class="avatar" onclick="apriAnagrafica('${atleta.fotoUrl}', '${atleta.nome}', '${atleta.cintura}', '${atleta.dataIscrizione}')">` : `<div class="avatar">${iniziali}</div>`;
+          let avatarHtml = atleta.fotoUrl ? `<img src="${atleta.fotoUrl}" class="avatar" style="cursor:pointer;" onclick="apriAnagrafica('${atleta.fotoUrl}', '${atleta.nome}', '${atleta.cintura}', '${atleta.dataIscrizione}')">` : `<div class="avatar" style="cursor:pointer;" onclick="apriAnagrafica('', '${atleta.nome}', '${atleta.cintura}', '${atleta.dataIscrizione}')">${iniziali}</div>`;
           
           li.innerHTML = `
               <div class="atleta-info-wrapper">
@@ -827,7 +827,7 @@
              }
              
              let iniziali = (atleta.nome.split(' ').map(n=>n[0]).join('')).substring(0,2);
-             let avatarHtml = atleta.fotoUrl ? `<img src="${atleta.fotoUrl}" class="avatar">` : `<div class="avatar">${iniziali}</div>`;
+             let avatarHtml = atleta.fotoUrl ? `<img src="${atleta.fotoUrl}" class="avatar" style="cursor:pointer;" onclick="apriAnagrafica('${atleta.fotoUrl}', '${atleta.nome}', '${atleta.cintura}', '')">` : `<div class="avatar" style="cursor:pointer;" onclick="apriAnagrafica('', '${atleta.nome}', '${atleta.cintura}', '')">${iniziali}</div>`;
              
              let perc = Math.min(100, (atleta.presenzeDalGrado / atleta.targetTotale) * 100);
              let barColor = perc >= 100 ? '#4ade80' : '#f97316';
@@ -835,7 +835,7 @@
              let checked = atletiSelezionatiPromo.has(atleta.nome) ? 'checked' : '';
              
              let inner = `
-                 <div class="atleta-info-wrapper" style="width:100%; cursor:pointer;" onclick="apriAnagrafica('${atleta.fotoUrl}', '${atleta.nome}', '${atleta.cintura}', '')">
+                 <div class="atleta-info-wrapper" style="width:100%;">
                      ${avatarHtml}
                      <div class="atleta-nome" style="width:100%;">
                          <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; margin-bottom:5px; gap:5px;">
