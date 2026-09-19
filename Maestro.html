@@ -832,28 +832,39 @@
              let checked = atletiSelezionatiPromo.has(atleta.nome) ? 'checked' : '';
              
              let inner = `
-                 <div class="atleta-info-wrapper" style="width:100%;">
-                     ${avatarHtml}
-                     <div class="atleta-nome" style="width:100%;">
-                         <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; margin-bottom:5px; gap:5px;">
-                             <strong style="display:block; flex:1; min-width:150px;">${atleta.nome} ${getBeltHtml(atleta.cintura)}</strong>
-                             <div style="display:flex; gap:5px; align-items:center; flex-shrink:0;">
-                                <button onclick="chiediRimanda('${atleta.nome}')" style="padding:4px 8px; background-color:#ef4444; color:white; border:none; border-radius:4px; font-weight:bold; font-size:10px; cursor:pointer;">RIMANDA</button>
-                                <label style="display:flex; align-items:center; background-color:#374151; border:1px solid #4ade80; border-radius:4px; padding:4px 8px; cursor:pointer; font-size:10px; color:white; font-weight:bold;">
-                                   <input type="checkbox" class="promo-checkbox" style="margin-right:5px; width:12px; height:12px; accent-color:#4ade80;" value="${atleta.nome}" onchange="togglePromoSelection(this)" ${checked}> 
-                                   PROMUOVI
-                                </label>
-                             </div>
+                 <div style="display:flex; flex-direction:column; width:100%;">
+                     <!-- Riga 1: Cintura, Nome, Bottoni -->
+                     <div style="display:flex; align-items:center; margin-bottom:8px;">
+                         <div style="width:40px; display:flex; justify-content:center; flex-shrink:0;">
+                             <span class="belt-icon belt-${atleta.cintura || 'BIANCA'}" style="margin:0;"></span>
                          </div>
-                         <div style="font-size:12px; color:#9ca3af; margin-bottom:2px;">Iscritto il: ${atleta.dataIscrizione || '--/--/----'}</div>
-                         <div style="font-size:12px; color:#9ca3af; margin-bottom:5px;">Da: ${atleta.dataUltimaCintura} (${atleta.mesiTrascorsi} mesi) - Ultima: ${atleta.ultimoAllenamento}</div>
+                         <strong style="font-size:14px; margin-left:10px; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${atleta.nome}</strong>
                          
-                         <div style="width:100%; background-color:#4b5563; border-radius:4px; height:12px; overflow:hidden; position:relative; margin-bottom:5px;">
-                            <div style="background-color:${barColor}; height:100%; width:${perc}%; transition: width 0.5s;"></div>
+                         <div style="display:flex; gap:5px; align-items:center; flex-shrink:0; margin-left:5px;">
+                            <button onclick="chiediRimanda('${atleta.nome}')" style="padding:4px 8px; background-color:#ef4444; color:white; border:none; border-radius:4px; font-weight:bold; font-size:10px; cursor:pointer;">RIMANDA</button>
+                            <label style="display:flex; align-items:center; background-color:#374151; border:1px solid #4ade80; border-radius:4px; padding:4px 8px; cursor:pointer; font-size:10px; color:white; font-weight:bold;">
+                               <input type="checkbox" class="promo-checkbox" style="margin-right:5px; width:12px; height:12px; accent-color:#4ade80;" value="${atleta.nome}" onchange="togglePromoSelection(this)" ${checked}> 
+                               PROMUOVI
+                            </label>
                          </div>
-                         <div style="font-size:12px; text-align:right; color:white; font-weight:bold; word-wrap: break-word;">
-                            ${atleta.presenzeDalGrado} / ${atleta.targetTotale} lezioni
-                            ${atleta.malus > 0 ? `<span style="color:#f87171;">(Malus +${atleta.malus})</span>` : ''}
+                     </div>
+                     
+                     <!-- Riga 2: Foto e Info -->
+                     <div style="display:flex; align-items:center;">
+                         <div style="width:40px; flex-shrink:0; display:flex; justify-content:center;">
+                             ${avatarHtml}
+                         </div>
+                         <div style="margin-left:10px; flex:1;">
+                             <div style="font-size:12px; color:#9ca3af; margin-bottom:2px;">Iscritto il: ${atleta.dataIscrizione || '--/--/----'}</div>
+                             <div style="font-size:12px; color:#9ca3af; margin-bottom:5px;">Da: ${atleta.dataUltimaCintura} (${atleta.mesiTrascorsi} mesi) - Ultima: ${atleta.ultimoAllenamento}</div>
+                             
+                             <div style="width:100%; background-color:#4b5563; border-radius:4px; height:12px; overflow:hidden; position:relative; margin-bottom:5px;">
+                                <div style="background-color:${barColor}; height:100%; width:${perc}%; transition: width 0.5s;"></div>
+                             </div>
+                             <div style="font-size:12px; text-align:right; color:white; font-weight:bold; word-wrap: break-word;">
+                                ${atleta.presenzeDalGrado} / ${atleta.targetTotale} lezioni
+                                ${atleta.malus > 0 ? `<span style="color:#f87171;">(Malus +${atleta.malus})</span>` : ''}
+                             </div>
                          </div>
                      </div>
                  </div>
