@@ -129,25 +129,28 @@ function CREA_SIMULAZIONE_DATI() {
   const folder = DriveApp.getFolderById("1DoBG3xKvEFnO31Oxw9zCbwhiecdhH0w-");
   
   let oggi = new Date();
+  var giorniSettimana = ["DOMENICA", "LUNEDÌ", "MARTEDÌ", "MERCOLEDÌ", "GIOVEDÌ", "VENERDÌ", "SABATO"];
   
   SIMULAZIONE_DATI.forEach(atleta => {
     // 1. Carica foto su Drive
-    let blob = Utilities.newBlob(Utilities.base64Decode(atleta.b64), MimeType.PNG, "foto_" + atleta.nome + ".png");
+    let blob = Utilities.newBlob(Utilities.base64Decode(atleta.b64), MimeType.PNG, "foto_" + atleta.nome.toUpperCase() + ".png");
     let file = folder.createFile(blob);
     let urlFoto = file.getUrl();
     
-    // 2. Crea Atleta in ATLETI
-    // Data Iscrizione = oggi meno un po' di mesi
+    // 2. Crea Atleta in ATLETI (NOME | FOTO | DATA REGISTRAZIONE | CINTURA | DATA NASCITA)
     let dataIscrizione = Utilities.formatDate(new Date(oggi.getFullYear(), oggi.getMonth() - Math.floor(Math.random() * 10), 1), Session.getScriptTimeZone(), "dd/MM/yyyy");
     
-    foglioAtleti.appendRow([atleta.nome, urlFoto, dataIscrizione, atleta.cintura, atleta.dataNascita]);
+    foglioAtleti.appendRow([atleta.nome.toUpperCase(), urlFoto, dataIscrizione, atleta.cintura, atleta.dataNascita]);
     
     // 3. Simula Presenze (da 1 a 3 presenze per testare le promozioni a "2")
+    // REGISTRO GREZZO: DATA | ORA | GIORNO DELLA SETTIMANA | NOME E COGNOME | STATO REGISTRAZIONE
     let numPresenze = Math.floor(Math.random() * 3) + 1; 
     
     for(let i = 0; i < numPresenze; i++) {
-        let dataPresenza = Utilities.formatDate(new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate() - i), Session.getScriptTimeZone(), "dd/MM/yyyy");
-        foglioRegistro.appendRow([atleta.nome, dataPresenza, "18:00", "CONFERMATO", ""]);
+        let dataPresenzaObj = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate() - i);
+        let dataPresenza = Utilities.formatDate(dataPresenzaObj, Session.getScriptTimeZone(), "dd/MM/yyyy");
+        let giornoSettimana = giorniSettimana[dataPresenzaObj.getDay()];
+        foglioRegistro.appendRow([dataPresenza, "18:00", giornoSettimana, atleta.nome.toUpperCase(), "OK REGISTRAZIONE"]);
     }
   });
   

@@ -130,7 +130,6 @@
           <div id="loginError" class="error-msg"></div>
       </div>
     </div>
-    </div>
 
     <div id="dashboardView" class="hidden">
       
@@ -959,16 +958,19 @@
             let atleta = databasePromoGlobale.find(a => a.nome === nomeAtleta);
             if(!atleta) return;
             
+            const gerarchiaCinture = ["BIANCA", "BLU", "VIOLA", "MARRONE", "NERA"];
+            const idxAttuale = gerarchiaCinture.indexOf(atleta.cintura || "BIANCA");
+            let opzioniCintura = "";
+            for(let c = idxAttuale + 1; c < gerarchiaCinture.length; c++) {
+               opzioniCintura += `<option value="${gerarchiaCinture[c]}">${gerarchiaCinture[c]}</option>`;
+            }
+            
             let html = `
                <div style="background:#374151; padding:10px; border-radius:8px; margin-bottom:10px;">
                   <strong style="color:white; display:block; margin-bottom:5px;">${atleta.nome} ${getBeltHtml(atleta.cintura)}</strong>
                   <select id="promoCintura_${atleta.nome.replace(/\s+/g, '_')}" class="date-picker" style="margin-bottom:5px;">
                      <option value="" disabled selected>SCEGLI NUOVA CINTURA</option>
-                     <option value="BIANCA">BIANCA</option>
-                     <option value="BLU">BLU</option>
-                     <option value="VIOLA">VIOLA</option>
-                     <option value="MARRONE">MARRONE</option>
-                     <option value="NERA">NERA</option>
+                     ${opzioniCintura}
                   </select>
                   <input type="text" id="promoNote_${atleta.nome.replace(/\s+/g, '_')}" class="date-picker" placeholder="NOTE (OPZIONALE)">
                </div>
