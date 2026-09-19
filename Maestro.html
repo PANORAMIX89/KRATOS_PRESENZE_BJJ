@@ -1133,6 +1133,8 @@
         google.script.run.withSuccessHandler(() => {
           btn.innerText = "✅ UFFICIALIZZA CLASSE";
           btn.disabled = false;
+          // Reset checkboxes to allow new data to render without triggering the safety block
+          document.querySelectorAll('.checkbox-appello').forEach(cb => cb.checked = true);
           caricaDatiGiorno();
         }).ufficializzaPresenze(righeConfermati, righeFurbetti);
       }
