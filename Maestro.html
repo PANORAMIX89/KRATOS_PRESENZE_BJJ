@@ -123,16 +123,9 @@
 
     <div id="dashboardView" class="hidden">
       
-      <div style="display:flex; justify-content:center; align-items:center; margin-bottom: 5px; position:relative;">
-        <h1 style="margin:0; font-size: 24px; text-transform: uppercase;">Dashboard Maestro</h1>
-        <button class="btn-reset" style="padding: 8px 15px; width: auto; font-size: 14px; position:absolute; right:0;" onclick="esci()">Esci</button>
-      </div>
-
-      <div style="display:flex; gap:5px; margin-bottom: 5px;">
-        <div style="flex:1;"></div>
-        <div style="flex:1;"></div>
-        <div style="flex:1;"></div>
-        <button class="btn-main" style="flex:1; padding: 4px; font-size: 10px; background-color: white; color: #f97316; border: 1px solid #f97316;" onclick="apriConfigTarget()">PROMO TIME</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+        <h1 style="margin:0; font-size: 20px; text-transform: uppercase;">Dashboard Maestro</h1>
+        <button class="btn-reset" style="padding: 6px 12px; width: auto; font-size: 12px; margin: 0;" onclick="esci()">Esci</button>
       </div>
       
       <div class="tabs">
@@ -238,8 +231,9 @@
 
     
       <div id="vistaPromozioni" class="vista-tab hidden">
-        <div class="header-dash">
-          <h2>Gestione Promozioni</h2>
+        <div class="header-dash" style="display:flex; justify-content:space-between; align-items:center;">
+          <h2 style="margin:0;">Gestione Promozioni</h2>
+          <button class="btn-main" style="padding: 6px 10px; font-size: 10px; background-color: white; color: #f97316; border: 1px solid #f97316; width: auto; margin:0;" onclick="apriConfigTarget()">PROMO TIME</button>
         </div>
         <div style="margin-bottom: 20px;">
           <input type="text" id="ricercaPromoLibera" class="date-picker" placeholder="CERCA ATLETA..." onkeyup="filtraPromoLista()">
