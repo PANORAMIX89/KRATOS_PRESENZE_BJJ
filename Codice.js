@@ -914,6 +914,16 @@ function getDatiPromozioneAvanzati() {
       if (datiPres.ultimoAllenamento) {
          strUltimoAllenamento = Utilities.formatDate(datiPres.ultimoAllenamento, Session.getScriptTimeZone(), "dd/MM/yyyy");
       }
+      
+      let valIscrizione = atletiDati[i][2];
+      let strIscrizione = "--/--/----";
+      if (valIscrizione) {
+          if (valIscrizione instanceof Date) {
+              strIscrizione = Utilities.formatDate(valIscrizione, Session.getScriptTimeZone(), "dd/MM/yyyy");
+          } else {
+              strIscrizione = valIscrizione.toString().trim();
+          }
+      }
 
       risultati.push({
          nome: nome,
@@ -925,8 +935,9 @@ function getDatiPromozioneAvanzati() {
          targetBase: targetBase,
          malus: malus,
          targetTotale: targetTotale,
-         idoneo: lezioniFatte >= targetTotale,
-         ultimoAllenamento: strUltimoAllenamento
+         idoneo: (lezioniFatte >= targetTotale),
+         ultimoAllenamento: strUltimoAllenamento,
+         dataIscrizione: strIscrizione
       });
     }
     

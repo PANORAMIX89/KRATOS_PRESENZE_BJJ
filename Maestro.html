@@ -256,13 +256,16 @@
         <div id="loadingPromo" class="loader-container hidden"><div class="loader"></div></div>
         
         <div id="contenutoPromo">
-           <div class="section-title" style="justify-content:center; gap:10px;"><span>Atleti Idonei alla Promozione</span><span class="count-badge" id="countIdonei">0</span></div>
+           <div style="position: sticky; top: 0; z-index: 10; background: #111827; padding: 15px 0; border-bottom: 2px solid #374151; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+               <button class="btn-login" style="margin: 0; width: auto; padding: 10px 15px; font-size: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);" onclick="apriModalPromo()">ASSEGNA NUOVA CINTURA</button>
+               <div style="display: flex; flex-direction: column; align-items: flex-end; font-size: 12px; font-weight: 900; text-transform: uppercase; gap: 8px;">
+                   <div style="color: #facc15; display:flex; align-items:center; gap:5px;">ATLETI IDONEI <span class="count-badge" id="countIdonei" style="background:#facc15; color:#000; padding:2px 8px; margin:0;">0</span></div>
+                   <div style="color: #fff; display:flex; align-items:center; gap:5px;">ATLETI IN PERCORSO <span class="count-badge" id="countInPercorso" style="padding:2px 8px; margin:0;">0</span></div>
+               </div>
+           </div>
+           
            <div id="listaIdoneiPromo" style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;"></div>
-           
-           <div class="section-title" style="margin-top:20px; justify-content:center; gap:10px;"><span>Atleti in Percorso</span><span class="count-badge" id="countInPercorso">0</span></div>
-           <div id="listaInPercorsoPromo" style="display:flex; flex-direction:column; gap:10px;"></div>
-           
-           <button class="btn-login" style="margin-top:20px;" onclick="apriModalPromo()">ASSEGNA NUOVA CINTURA</button>
+           <div id="listaInPercorsoPromo" style="display:flex; flex-direction:column; gap:10px; margin-bottom:40px;"></div>
         </div>
       </div>
 
@@ -563,7 +566,7 @@
                    if (dataPromo) {
                        detailsHtml = `<div style="font-size:12px; color:#4ade80;">Data di conseguimento: ${dataPromo}</div>`;
                    } else {
-                       detailsHtml = `<div style="font-size:12px; color:#4ade80;">Cintura superata</div>`;
+                       detailsHtml = ``;
                    }
                }
                
@@ -848,6 +851,7 @@
                                 </label>
                              </div>
                          </div>
+                         <div style="font-size:12px; color:#9ca3af; margin-bottom:2px;">Iscritto il: ${atleta.dataIscrizione || '--/--/----'}</div>
                          <div style="font-size:12px; color:#9ca3af; margin-bottom:5px;">Da: ${atleta.dataUltimaCintura} (${atleta.mesiTrascorsi} mesi) - Ultima: ${atleta.ultimoAllenamento}</div>
                          
                          <div style="width:100%; background-color:#4b5563; border-radius:4px; height:12px; overflow:hidden; position:relative; margin-bottom:5px;">
