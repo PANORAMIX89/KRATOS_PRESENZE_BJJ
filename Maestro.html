@@ -678,9 +678,13 @@
            return;
         }
         
+        const uncheckedBoxes = new Set();
+        document.querySelectorAll('.checkbox-appello:not(:checked)').forEach(cb => uncheckedBoxes.add(cb.value));
+        
         const ulInAttesa = document.getElementById('listaInAttesa');
         const ulPartecipanti = document.getElementById('listaPartecipanti');
         const ulFurbetti = document.getElementById('listaFurbetti');
+        
         ulInAttesa.innerHTML = ""; ulPartecipanti.innerHTML = ""; ulFurbetti.innerHTML = "";
         
         document.getElementById('countInAttesa').innerText = dati.inAttesa ? dati.inAttesa.length : 0;
@@ -702,6 +706,14 @@
 
         dati.partecipanti.forEach(a => ulPartecipanti.appendChild(creaRigaCheckin(a, true, false)));
         dati.furbetti.forEach(a => ulFurbetti.appendChild(creaRigaCheckin(a, false, false)));
+        
+        if (uncheckedBoxes.size > 0) {
+            document.querySelectorAll('.checkbox-appello').forEach(cb => {
+                if (uncheckedBoxes.has(cb.value)) {
+                    cb.checked = false;
+                }
+            });
+        }
       }
 
       
