@@ -153,7 +153,7 @@ function registraPresenza(nome) {
   }
 }
 
-function registraNuovoAtleta(nome, dataUriImmagine, cintura) {
+function registraNuovoAtleta(nome, dataUriImmagine, cintura, dataNascita) {
   try {
     // FIX: CONTROLLO ANTI-DUPLICATI
     const nomeDaVerificare = nome.toUpperCase().trim();
@@ -190,7 +190,13 @@ function registraNuovoAtleta(nome, dataUriImmagine, cintura) {
     const dataScritta = Utilities.formatDate(dataOdierna, Session.getScriptTimeZone(), "dd/MM/yyyy");
     const cinturaScritta = cintura ? cintura.toUpperCase() : "BIANCA";
     
-    ss.getSheetByName("ATLETI").appendRow([nome, file.getUrl(), dataScritta, cinturaScritta]);
+    let dataNascitaScritta = "";
+    if (dataNascita) {
+       const parti = dataNascita.split("-");
+       if (parti.length === 3) dataNascitaScritta = `${parti[2]}/${parti[1]}/${parti[0]}`;
+    }
+    
+    ss.getSheetByName("ATLETI").appendRow([nome, file.getUrl(), dataScritta, cinturaScritta, dataNascitaScritta]);
     
     // Salva nello storico
     const foglioStorico = ss.getSheetByName("STORICO CINTURE");
@@ -924,6 +930,16 @@ function getDatiPromozioneAvanzati() {
               strIscrizione = valIscrizione.toString().trim();
           }
       }
+      
+      let valNascita = atletiDati[i][4];
+      let strNascita = "";
+      if (valNascita) {
+          if (valNascita instanceof Date) {
+              strNascita = Utilities.formatDate(valNascita, Session.getScriptTimeZone(), "dd/MM/yyyy");
+          } else {
+              strNascita = valNascita.toString().trim();
+          }
+      }
 
       risultati.push({
          nome: nome,
@@ -937,7 +953,8 @@ function getDatiPromozioneAvanzati() {
          targetTotale: targetTotale,
          idoneo: (lezioniFatte >= targetTotale),
          ultimoAllenamento: strUltimoAllenamento,
-         dataIscrizione: strIscrizione
+         dataIscrizione: strIscrizione,
+         dataNascita: strNascita
       });
     }
     
@@ -988,10 +1005,21 @@ function getAnagraficaAvanzata(nome) {
        }
        for(let i=dataStart; i<datiAtleti.length; i++) {
            if(datiAtleti[i][0] && datiAtleti[i][0].toString().trim().toUpperCase() === nomeUpper) {
+               let valNascita = datiAtleti[i][4];
+               let strNascita = "";
+               if (valNascita) {
+                   if (valNascita instanceof Date) {
+                       strNascita = Utilities.formatDate(valNascita, Session.getScriptTimeZone(), "dd/MM/yyyy");
+                   } else {
+                       strNascita = valNascita.toString().trim();
+                   }
+               }
+
                atletaInfo = {
                    nome: nomeUpper,
                    fotoUrl: datiAtleti[i][1] ? datiAtleti[i][1].toString() : "",
-                   cintura: datiAtleti[i][3] ? datiAtleti[i][3].toString().toUpperCase().trim() : "BIANCA"
+                   cintura: datiAtleti[i][3] ? datiAtleti[i][3].toString().toUpperCase().trim() : "BIANCA",
+                   dataNascita: strNascita
                };
                break;
            }

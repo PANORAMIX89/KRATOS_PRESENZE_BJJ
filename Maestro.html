@@ -329,8 +329,9 @@
          <div style="text-align:center; margin-bottom:15px;">
             <img id="anagraficaImg" src="" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid #f97316; margin-bottom:10px; display:none;">
             <h2 id="anagraficaNome" style="color:white; margin:0; font-size:20px;"></h2>
-            <div id="anagraficaDataIscrizione" style="font-size:12px; color:#9ca3af; margin-top:2px;"></div>
-            <div id="anagraficaCinturaContainer" style="margin-top:5px;"></div>
+           <div id="anagraficaDataNascita" style="font-size:12px; color:#9ca3af; margin-top:2px; text-transform:uppercase;"></div>
+           <div id="anagraficaDataIscrizione" style="font-size:12px; color:#9ca3af; margin-top:2px; text-transform:uppercase;"></div>
+           <div id="anagraficaCinturaContainer" style="margin-top:5px;"></div>
          </div>
          
          <div style="background:#374151; padding:15px; border-radius:8px; margin-bottom:15px; text-align:center;">
@@ -471,7 +472,7 @@
          document.getElementById('anagraficaNome').innerText = nome;
          
          if(dataIscrizione && dataIscrizione !== "--/--/----" && dataIscrizione !== "undefined") {
-            document.getElementById('anagraficaDataIscrizione').innerText = "Iscritto il: " + dataIscrizione;
+            document.getElementById('anagraficaDataIscrizione').innerText = "📅 ISCRITTO IL: " + dataIscrizione;
          } else {
             document.getElementById('anagraficaDataIscrizione').innerText = "";
          }
@@ -499,6 +500,13 @@
 
             if (res.statsAvanzate) {
                let a = res.statsAvanzate;
+               
+               if(a.dataNascita && a.dataNascita !== "--/--/----" && a.dataNascita !== "undefined") {
+                  document.getElementById('anagraficaDataNascita').innerText = "🎂 DATA DI NASCITA: " + a.dataNascita;
+               } else {
+                  document.getElementById('anagraficaDataNascita').innerText = "";
+               }
+               
                let perc = Math.min(100, (a.presenzeDalGrado / a.targetTotale) * 100);
                let color = perc >= 100 ? '#4ade80' : '#f97316';
                

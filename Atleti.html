@@ -58,6 +58,9 @@
       <input type="text" id="nuovoNome" placeholder="NOME">
       <input type="text" id="nuovoCognome" placeholder="COGNOME">
       
+      <div style="text-align: left; margin-bottom: 5px; color: white; font-size: 12px; padding-left: 5px; text-transform: uppercase;">DATA DI NASCITA</div>
+      <input type="date" id="nuovaDataNascita" class="date-picker" style="margin-bottom: 10px;">
+      
         <div id="cinturaSelectorContainer" style="position:relative; margin:10px 0;">
             <div id="selectedBeltVisual" onclick="toggleBeltDropdown()" style="width:100%; padding:15px; border:1px solid #4b5563; border-radius:8px; background-color:#374151; color:white; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
                <div style="display:flex; align-items:center;">
@@ -178,12 +181,13 @@
         const nome = document.getElementById('nuovoNome').value.trim().toUpperCase();
         const cognome = document.getElementById('nuovoCognome').value.trim().toUpperCase();
         const cintura = document.getElementById('nuovaCintura').value;
+        const dataNascita = document.getElementById('nuovaDataNascita').value;
         const fileInput = document.getElementById('fotoSelfie');
         const msgDiv = document.getElementById('msgNew');
         const btnInvia = document.getElementById('btnSalvaNuovo');
         
-        if (!nome || !cognome || !cintura || fileInput.files.length === 0) {
-          msgDiv.innerHTML = "<span class='error'>Nome, Cognome, Cintura o selfie mancante!</span>";
+        if (!nome || !cognome || !cintura || !dataNascita || fileInput.files.length === 0) {
+          msgDiv.innerHTML = "<span class='error'>Tutti i campi (inclusa Data di Nascita e Selfie) sono obbligatori!</span>";
           return;
         }
 
@@ -211,7 +215,7 @@
               msgDiv.innerHTML = "<span class='error'>" + res.message + "</span>";
               btnInvia.disabled = false;
             }
-          }).registraNuovoAtleta(nomeCompleto, e.target.result, cintura);
+          }).registraNuovoAtleta(nomeCompleto, e.target.result, cintura, dataNascita);
         };
         reader.readAsDataURL(fileInput.files[0]);
       }
