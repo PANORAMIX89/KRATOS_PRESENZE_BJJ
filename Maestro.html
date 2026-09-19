@@ -824,7 +824,7 @@
              }
              
              let iniziali = (atleta.nome.split(' ').map(n=>n[0]).join('')).substring(0,2);
-             let avatarHtml = atleta.fotoUrl ? `<img src="${atleta.fotoUrl}" class="avatar" style="cursor:pointer;" onclick="apriAnagrafica('${atleta.fotoUrl}', '${atleta.nome}', '${atleta.cintura}', '')">` : `<div class="avatar" style="cursor:pointer;" onclick="apriAnagrafica('', '${atleta.nome}', '${atleta.cintura}', '')">${iniziali}</div>`;
+             let avatarHtml = atleta.fotoUrl ? `<img src="${atleta.fotoUrl}" class="avatar" style="cursor:pointer;" onclick="apriAnagrafica('${atleta.fotoUrl}', '${atleta.nome}', '${atleta.cintura}', '${atleta.dataIscrizione}')">` : `<div class="avatar" style="cursor:pointer;" onclick="apriAnagrafica('', '${atleta.nome}', '${atleta.cintura}', '${atleta.dataIscrizione}')">${iniziali}</div>`;
              
              let perc = Math.min(100, (atleta.presenzeDalGrado / atleta.targetTotale) * 100);
              let barColor = perc >= 100 ? '#4ade80' : '#f97316';
