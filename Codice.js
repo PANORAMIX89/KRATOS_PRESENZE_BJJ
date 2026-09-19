@@ -443,7 +443,20 @@ function getStatisticheAnnuali(anno, mesi, nome) {
   for (let i = 1; i < datiRegistro.length; i++) {
     if (!datiRegistro[i][0]) continue;
     
-    const dataObj = new Date(datiRegistro[i][0]); 
+    let valoreData = datiRegistro[i][0];
+    let dataObj;
+    if (valoreData instanceof Date) {
+      dataObj = valoreData;
+    } else {
+      let str = valoreData.toString().trim();
+      let parts = str.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+      if (parts) {
+        dataObj = new Date(parts[3], parts[2] - 1, parts[1]);
+      } else {
+        dataObj = new Date(str);
+      }
+    }
+    
     let ora = datiRegistro[i][1];
     if (ora instanceof Date) ora = Utilities.formatDate(ora, Session.getScriptTimeZone(), "HH:mm");
     
