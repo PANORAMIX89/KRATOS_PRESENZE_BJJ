@@ -202,8 +202,25 @@
       </div>
 
       <div id="vistaAnnuale" class="vista-tab hidden">
-        <h2>Ricerca Storica</h2>
-        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 20px;">
+        <div class="tabs" style="margin-bottom: 15px; border-bottom: 1px solid #374151;">
+          <button class="tab-btn active" id="btnSubTabClassifica" onclick="cambiaSubTabStatistiche('classifica')" style="flex:1;">CLASSIFICA</button>
+          <button class="tab-btn" id="btnSubTabRicerca" onclick="cambiaSubTabStatistiche('ricerca')" style="flex:1;">RICERCA STORICA</button>
+        </div>
+
+        <!-- SOTTO-TAB: CLASSIFICA -->
+        <div id="subTabClassifica">
+          <div style="display:flex; gap:10px; margin-bottom: 15px;">
+             <button class="btn-main active" id="btnFiltroClassificaAnno" onclick="caricaClassifica('anno')" style="flex:1; padding:10px; font-size:12px;">ANNO CORRENTE</button>
+             <button class="btn-main" id="btnFiltroClassificaMese" onclick="caricaClassifica('mese')" style="flex:1; padding:10px; font-size:12px; background:transparent; color:#f97316;">MESE CORRENTE</button>
+          </div>
+          <div id="loadingClassifica" class="loader-container hidden"><div class="loader"></div></div>
+          <ul class="lista" id="listaClassifica"></ul>
+        </div>
+
+        <!-- SOTTO-TAB: RICERCA STORICA -->
+        <div id="subTabRicerca" class="hidden">
+          <h2>Ricerca Storica</h2>
+          <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 20px;">
           
           <select id="annoFiltro" class="date-picker">
           </select>
@@ -235,6 +252,7 @@
         <div id="totaleRisultati" class="totale-box hidden"></div>
         <div id="risultatiAnnuali">
           <div style="text-align:center; padding:20px; color:#666;">Usa i filtri per cercare nel registro.</div>
+        </div>
         </div>
       </div>
     </div>
@@ -268,6 +286,10 @@
                </div>
            </div>
            
+           <div class="tabs" style="margin-top:0; margin-bottom:10px;">
+               <button class="tab-btn active" id="btnPromoTutti" onclick="cambiaSubTabPromo('TUTTI')">TUTTI GLI ATLETI</button>
+               <button class="tab-btn" id="btnPromoDaGraduare" onclick="cambiaSubTabPromo('DA_GRADUARE')" style="position:relative;">🔔 DA GRADUARE <span id="badgeDaGraduare" style="background:#ef4444; color:white; border-radius:50%; padding:2px 6px; font-size:10px; margin-left:5px;">0</span></button>
+           </div>
            <div id="listaIdoneiPromo" style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;"></div>
            <div id="listaInPercorsoPromo" style="display:flex; flex-direction:column; gap:10px; margin-bottom:40px;"></div>
         </div>
@@ -342,6 +364,7 @@
            <div id="anagraficaDataNascita" style="font-size:12px; color:#9ca3af; margin-top:2px; text-transform:uppercase;"></div>
            <div id="anagraficaDataIscrizione" style="font-size:12px; color:#9ca3af; margin-top:2px; text-transform:uppercase;"></div>
            <div id="anagraficaCinturaContainer" style="margin-top:5px;"></div>
+           <button class="btn-main" style="margin-top:10px; padding:8px 12px; font-size:12px; background-color:#f97316; color:#ffffff; border:1px solid #f97316; width:auto;" onclick="apriCorrezioneCintura()">✏️ CORREGGI CINTURA</button>
          </div>
          
          <div style="background:#374151; padding:15px; border-radius:8px; margin-bottom:15px; text-align:center;">
@@ -358,10 +381,53 @@
       </div>
     </div>
 
-    <div id="modalZoom" class="modal" onclick="chiudiModal()">
+     <div id="modalZoom" class="modal" onclick="chiudiModal()">
       <img id="zoomImg" class="modal-content" src="">
       <div id="zoomNome" class="modal-text"></div>
     </div>
+
+    <!-- Modale Correzione Cintura -->
+    <div id="modalCorrezioneCintura" class="modal" style="display:none; justify-content:center; align-items:center;">
+      <div class="modal-content" style="background:#1f2937; padding:20px; width:90%; max-width:400px; border: 2px solid #f97316; border-radius:12px; position:relative;">
+         <h2 style="color:white; text-align:center; margin-top:0;">CORREGGI CINTURA</h2>
+         <h3 id="correzioneNome" style="color:#f97316; text-align:center;"></h3>
+         <div style="margin-top:15px;">
+            <label style="color:white; font-size:14px;">Nuova Cintura Corretta:</label>
+            <select id="correzioneNuovaCintura" class="date-picker">
+<option value="BIANCA">BIANCA</option>
+<option value="BIANCA - 1° GRADO">BIANCA - 1° GRADO</option>
+<option value="BIANCA - 2° GRADO">BIANCA - 2° GRADO</option>
+<option value="BIANCA - 3° GRADO">BIANCA - 3° GRADO</option>
+<option value="BIANCA - 4° GRADO">BIANCA - 4° GRADO</option>
+<option value="BLU">BLU</option>
+<option value="BLU - 1° GRADO">BLU - 1° GRADO</option>
+<option value="BLU - 2° GRADO">BLU - 2° GRADO</option>
+<option value="BLU - 3° GRADO">BLU - 3° GRADO</option>
+<option value="BLU - 4° GRADO">BLU - 4° GRADO</option>
+<option value="VIOLA">VIOLA</option>
+<option value="VIOLA - 1° GRADO">VIOLA - 1° GRADO</option>
+<option value="VIOLA - 2° GRADO">VIOLA - 2° GRADO</option>
+<option value="VIOLA - 3° GRADO">VIOLA - 3° GRADO</option>
+<option value="VIOLA - 4° GRADO">VIOLA - 4° GRADO</option>
+<option value="MARRONE">MARRONE</option>
+<option value="MARRONE - 1° GRADO">MARRONE - 1° GRADO</option>
+<option value="MARRONE - 2° GRADO">MARRONE - 2° GRADO</option>
+<option value="MARRONE - 3° GRADO">MARRONE - 3° GRADO</option>
+<option value="MARRONE - 4° GRADO">MARRONE - 4° GRADO</option>
+<option value="NERA">NERA</option>
+<option value="NERA - 1° GRADO">NERA - 1° GRADO</option>
+<option value="NERA - 2° GRADO">NERA - 2° GRADO</option>
+<option value="NERA - 3° GRADO">NERA - 3° GRADO</option>
+<option value="NERA - 4° GRADO">NERA - 4° GRADO</option>
+<option value="NERA - 5° GRADO">NERA - 5° GRADO</option>
+<option value="NERA - 6° GRADO">NERA - 6° GRADO</option>
+</select>
+         </div>
+         <button class="btn-login" style="margin-top:20px;" onclick="salvaCorrezioneCintura()">SALVA CORREZIONE</button>
+         <button class="btn-reset" style="margin-top:10px;" onclick="chiudiCorrezioneCintura()">ANNULLA</button>
+      </div>
+    </div>
+
 
     <script>
       let databaseAtletiGlobale = []; 
@@ -470,11 +536,110 @@
         
         if(tabId === 'vistaAtleti') document.getElementById('btnTab0').classList.add('active');
         else if(tabId === 'vistaGiornaliera') document.getElementById('btnTab1').classList.add('active');
-        else if(tabId === 'vistaAnnuale') document.getElementById('btnTab2').classList.add('active');
+        else if(tabId === 'vistaAnnuale') {
+            document.getElementById('btnTab2').classList.add('active');
+            cambiaSubTabStatistiche('classifica');
+        }
         else if(tabId === 'vistaPromozioni') {
            document.getElementById('btnTab3').classList.add('active');
            caricaDatiPromozione();
         }
+      }
+
+      function cambiaSubTabStatistiche(subTab) {
+          document.getElementById('subTabClassifica').classList.add('hidden');
+          document.getElementById('subTabRicerca').classList.add('hidden');
+          document.getElementById('btnSubTabClassifica').classList.remove('active');
+          document.getElementById('btnSubTabRicerca').classList.remove('active');
+
+          if(subTab === 'classifica') {
+              document.getElementById('subTabClassifica').classList.remove('hidden');
+              document.getElementById('btnSubTabClassifica').classList.add('active');
+              // Se la classifica è vuota, caricala
+              if(document.getElementById('listaClassifica').innerHTML.trim() === '') {
+                  caricaClassifica('anno');
+              }
+          } else {
+              document.getElementById('subTabRicerca').classList.remove('hidden');
+              document.getElementById('btnSubTabRicerca').classList.add('active');
+          }
+      }
+
+      function caricaClassifica(tipo) {
+          const btnAnno = document.getElementById('btnFiltroClassificaAnno');
+          const btnMese = document.getElementById('btnFiltroClassificaMese');
+          
+          btnAnno.classList.remove('active');
+          btnAnno.style.background = 'transparent';
+          btnAnno.style.color = '#f97316';
+          
+          btnMese.classList.remove('active');
+          btnMese.style.background = 'transparent';
+          btnMese.style.color = '#f97316';
+
+          const oggi = new Date();
+          let anno = oggi.getFullYear();
+          let mese = null;
+
+          if(tipo === 'anno') {
+              btnAnno.classList.add('active');
+              btnAnno.style.background = '';
+              btnAnno.style.color = '';
+          } else {
+              btnMese.classList.add('active');
+              btnMese.style.background = '';
+              btnMese.style.color = '';
+              mese = oggi.getMonth() + 1;
+          }
+
+          const container = document.getElementById('listaClassifica');
+          container.innerHTML = '';
+          document.getElementById('loadingClassifica').classList.remove('hidden');
+
+          google.script.run.withSuccessHandler(res => {
+              document.getElementById('loadingClassifica').classList.add('hidden');
+              
+              if(res.length === 0) {
+                  container.innerHTML = "<div style='text-align:center; padding:20px; color:#dc3545;'>Nessun dato per questo periodo.</div>";
+                  return;
+              }
+
+              res.forEach((item, index) => {
+                  const li = document.createElement('li');
+                  li.className = 'lista-item';
+                  li.style.cursor = 'pointer';
+                  
+                  let medaglia = '';
+                  let coloreMedaglia = '#374151'; // default grigio scuro
+                  
+                  if (index === 0) { medaglia = '🥇'; coloreMedaglia = '#fbbf24'; }
+                  else if (index === 1) { medaglia = '🥈'; coloreMedaglia = '#9ca3af'; }
+                  else if (index === 2) { medaglia = '🥉'; coloreMedaglia = '#b45309'; }
+                  else { medaglia = (index + 1) + '°'; }
+
+                  let imgUrl = item.foto || 'https://via.placeholder.com/150/1f2937/FFFFFF?text=FOTO';
+                  
+                  li.innerHTML = `
+                    <div style="display:flex; align-items:center; width:100%;">
+                        <div style="width:30px; font-size:18px; font-weight:bold; color:${coloreMedaglia}; text-align:center; margin-right:10px;">
+                            ${medaglia}
+                        </div>
+                        <img src="${imgUrl}" alt="${item.nome}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; margin-right:15px; border:2px solid ${coloreMedaglia};">
+                        <div style="flex-grow:1;">
+                            <div style="font-weight:bold; color:white; font-size:14px;">${item.nome}</div>
+                            <div style="font-size:10px;">${getBeltHtml(item.cintura)}</div>
+                        </div>
+                        <div style="font-size:20px; font-weight:900; color:#f97316; margin-left:10px;">
+                            ${item.presenze}
+                        </div>
+                    </div>
+                  `;
+                  
+                  li.onclick = () => { apriAnagrafica(item.foto, item.nome, item.cintura, null); };
+                  
+                  container.appendChild(li);
+              });
+          }).getClassifica(anno, mese);
       }
 
       
@@ -550,58 +715,45 @@
             document.getElementById('anagraficaPresenze').innerText = res.presenzeTotali;
             
             let timelineHtml = "";
-            let beltSequence = ["BIANCA", "BLU", "VIOLA", "MARRONE", "NERA"];
-            let currentBeltIndex = beltSequence.indexOf(cintura);
-            if(currentBeltIndex === -1) currentBeltIndex = 0; // fallback
-
-            let beltsToShow = beltSequence.filter((belt, index) => {
+            let uniqueBelts = [];
+            if(res.storico) {
+                res.storico.forEach(e => {
+                    if(!uniqueBelts.includes(e.cintura) && e.cintura !== "") {
+                        uniqueBelts.push(e.cintura);
+                    }
+                });
+            }
+            if(cintura && !uniqueBelts.includes(cintura)) {
+                uniqueBelts.push(cintura);
+            }
+            
+            uniqueBelts.forEach((belt) => {
+               let isAttuale = (belt === cintura);
+               let stato = isAttuale ? "CINTURA ATTUALE" : "CONSEGUITA";
+               let colorStato = isAttuale ? "#f97316" : "#4ade80";
+               
                let eventiBelt = res.storico ? res.storico.filter(e => e.cintura === belt) : [];
-               return eventiBelt.length > 0 || index === currentBeltIndex;
-            });
-
-            beltsToShow.forEach((belt) => {
-               let index = beltSequence.indexOf(belt);
-               let eventiBelt = res.storico ? res.storico.filter(e => e.cintura === belt) : [];
-               let targetBase = res.targetCinture ? (res.targetCinture[belt] || 0) : 0;
                
-               let isAttuale = (index === currentBeltIndex);
-               let isPassata = (index < currentBeltIndex);
-               let stato = isPassata ? "CONSEGUITA" : (isAttuale ? "CINTURA ATTUALE" : "DA RAGGIUNGERE");
-               let colorStato = isPassata ? "#4ade80" : (isAttuale ? "#f97316" : "#9ca3af");
-               
-               let detailsHtml = "";
-               if (isAttuale) {
-                   detailsHtml = `<div style="font-size:12px; color:#d1d5db;">Target: ${targetBase} lezioni</div>`;
-               } else if (isPassata) {
-                   // Cerca evento promozione per trovare la data
-                   let promoEvent = eventiBelt.find(e => e.evento.toUpperCase().includes("PROMO"));
-                   let dataPromo = promoEvent ? promoEvent.data : "";
-                   if (dataPromo) {
-                       detailsHtml = `<div style="font-size:12px; color:#4ade80;">Data di conseguimento: ${dataPromo}</div>`;
-                   } else {
-                       detailsHtml = ``;
-                   }
-               }
-               
-               timelineHtml += `<div style="margin-bottom:10px; background:#374151; padding:10px; border-radius:6px; border-left:4px solid ${colorStato};">`;
-               timelineHtml += `<div style="display:flex; align-items:center;">
-                                   <div style="margin-right:10px;">${getBeltHtml(belt)}</div>
-                                   <div style="flex-grow:1; text-align:left;">
-                                      <div style="font-weight:bold; color:white;">${belt} <span style="font-size:11px; color:${colorStato};">(${stato})</span></div>
-                                      ${detailsHtml}
-                                   </div>
-                                </div>`;
+               let detailsHtml = `
+                                <div style="background:#1f2937; border-left:4px solid ${colorStato}; padding:10px; margin-bottom:10px; border-radius:4px;">
+                                   <div style="display:flex; align-items:center; gap:10px;">
+                                      ${getBeltHtml(belt)}
+                                      <div>
+                                         <strong style="color:white; font-size:16px;">${belt}</strong> <br><span style="font-size:12px; color:${colorStato};">${stato}</span>
+                                      </div>
+                                   </div>`;
                
                if(eventiBelt.length > 0) {
                    eventiBelt.reverse().forEach(ev => {
-                      timelineHtml += `<div style="margin-top:8px; font-size:12px; color:#d1d5db; border-top:1px solid #4b5563; padding-top:4px; text-align:left;">
-                                          <span style="color:#f97316;">${ev.data}</span> - <strong>${ev.evento}</strong> 
-                                          ${ev.note ? '<br><i style="color:#9ca3af;">' + ev.note + '</i>' : ''}
+                      detailsHtml += `<div style="margin-top:12px; font-size:12px; color:#d1d5db; border-top:1px solid #4b5563; padding-top:8px; text-align:left;">
+                                          <span style="color:#f97316;">${ev.data}</span> - <strong style="font-size:14px; color:white;">${ev.evento}</strong> 
+                                          ${ev.note ? '<br><i style="color:#9ca3af; margin-top:4px; display:inline-block;">' + ev.note + '</i>' : ''}
                                        </div>`;
                    });
                }
                
-               timelineHtml += `</div>`;
+               detailsHtml += `</div>`;
+               timelineHtml += detailsHtml;
             });
             document.getElementById('anagraficaTimeline').innerHTML = timelineHtml;
             
@@ -611,6 +763,39 @@
       function chiudiAnagrafica() {
          document.getElementById('modalAnagrafica').style.display = 'none';
          document.body.style.overflow = ''; // Restore background scrolling
+      }
+
+      function apriCorrezioneCintura() {
+         const nome = document.getElementById('anagraficaNome').innerText;
+         document.getElementById('correzioneNome').innerText = nome;
+         document.getElementById('modalCorrezioneCintura').style.display = 'flex';
+         document.getElementById('modalAnagrafica').style.display = 'none';
+      }
+      
+      function chiudiCorrezioneCintura() {
+         document.getElementById('modalCorrezioneCintura').style.display = 'none';
+         document.getElementById('modalAnagrafica').style.display = 'flex';
+      }
+
+      function salvaCorrezioneCintura() {
+         const nome = document.getElementById('correzioneNome').innerText;
+         const nuovaCintura = document.getElementById('correzioneNuovaCintura').value;
+         
+         chiudiCorrezioneCintura();
+         chiudiAnagrafica();
+         document.getElementById('loadingAtleti').classList.remove('hidden');
+         document.getElementById('contenutoAtleti').classList.add('hidden');
+         
+         google.script.run.withSuccessHandler(res => {
+            if(res.success) {
+               mostraNotifica(res.message);
+               inizializzaDatiAtleti(); 
+            } else {
+               mostraNotifica("Errore: " + res.message, "error");
+               document.getElementById('loadingAtleti').classList.add('hidden');
+               document.getElementById('contenutoAtleti').classList.remove('hidden');
+            }
+         }).correggiCintura(nome, nuovaCintura);
       }
 
       function apriModal(url, nome) {
@@ -734,8 +919,25 @@
 
       
       function getBeltHtml(cintura) {
-         if(!cintura) return '<span class="belt-icon belt-BIANCA"></span>';
-         return '<span class="belt-icon belt-' + cintura + '" title="' + cintura + '"></span>';
+         if(!cintura) cintura = 'BIANCA';
+         let str = cintura.toUpperCase().trim();
+         let colorMatch = str.match(/(BIANCA|BLU|VIOLA|MARRONE|NERA)/);
+         let color = colorMatch ? colorMatch[0] : 'BIANCA';
+         let gradoMatch = str.match(/(\d+)/);
+         let grado = gradoMatch ? parseInt(gradoMatch[0]) : 0;
+         
+         let tipColor = (color === 'NERA') ? '#ef4444' : '#000000';
+         let stripeColor = '#ffffff';
+         
+         let html = `<div style="display:inline-flex; width:60px; height:20px; margin-left:8px; vertical-align:middle; border:1px solid #000; box-shadow:0 2px 4px rgba(0,0,0,0.5); overflow:hidden; border-radius:3px;" title="${cintura}">
+                       <div class="belt-${color}" style="flex-grow:1; height:100%;"></div>
+                       <div style="width:20px; background-color:${tipColor}; height:100%; display:flex; flex-direction:column; justify-content:space-evenly; align-items:center; padding:2px 0;">`;
+         for(let i=0; i<grado; i++) {
+            html += `<div style="width:100%; height:2.5px; background-color:${stripeColor};"></div>`;
+         }
+         html += `     </div>
+                     </div>`;
+         return html;
       }
 
       function creaRigaAtletaGenerico(atleta) {
@@ -845,13 +1047,34 @@
       }
 
       let databasePromoGlobale = [];
+
+      let subTabPromoAttuale = 'TUTTI';
+      function cambiaSubTabPromo(tab) {
+         subTabPromoAttuale = tab;
+         document.getElementById('btnPromoTutti').classList.remove('active');
+         document.getElementById('btnPromoDaGraduare').classList.remove('active');
+         if(tab === 'TUTTI') document.getElementById('btnPromoTutti').classList.add('active');
+         else document.getElementById('btnPromoDaGraduare').classList.add('active');
+         renderizzaListaPromo(databasePromoGlobale);
+      }
+
       
       function renderizzaListaPromo(lista) {
           const containerIdonei = document.getElementById('listaIdoneiPromo');
           const containerInPercorso = document.getElementById('listaInPercorsoPromo');
+          if(subTabPromoAttuale === 'DA_GRADUARE') {
+              lista = lista.filter(a => a.idoneo);
+              containerInPercorso.style.display = 'none';
+          } else {
+              containerInPercorso.style.display = 'flex';
+          }
+
           containerIdonei.innerHTML = "";
           containerInPercorso.innerHTML = "";
           
+                    let countDaGraduare = databasePromoGlobale.filter(a => a.idoneo).length;
+          let b = document.getElementById('badgeDaGraduare');
+          if(b) b.innerText = countDaGraduare;
           let countIdonei = 0;
           let countInPercorso = 0;
           
@@ -882,7 +1105,7 @@
                          <div style="width:40px; display:flex; justify-content:center; flex-shrink:0;">
                              <span class="belt-icon belt-${atleta.cintura || 'BIANCA'}" style="margin:0;"></span>
                          </div>
-                         <strong style="font-size:14px; margin-left:10px; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${atleta.nome}</strong>
+                         <strong style="font-size:14px; margin-left:10px; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; text-decoration:underline;" onclick="apriAnagrafica('${atleta.fotoUrl || ''}', '${atleta.nome}', '${atleta.cintura}', '${atleta.dataIscrizione}')">${atleta.nome}</strong>
                          
                          <div style="display:flex; gap:5px; align-items:center; flex-shrink:0; margin-left:5px;">
                             <button onclick="chiediRimanda('${atleta.nome}')" style="padding:4px 8px; background-color:#ef4444; color:white; border:none; border-radius:4px; font-weight:bold; font-size:10px; cursor:pointer;">RIMANDA</button>
@@ -961,9 +1184,34 @@
             const gerarchiaCinture = ["BIANCA", "BLU", "VIOLA", "MARRONE", "NERA"];
             const idxAttuale = gerarchiaCinture.indexOf(atleta.cintura || "BIANCA");
             let opzioniCintura = "";
-            for(let c = idxAttuale + 1; c < gerarchiaCinture.length; c++) {
-               opzioniCintura += `<option value="${gerarchiaCinture[c]}">${gerarchiaCinture[c]}</option>`;
-            }
+            opzioniCintura = `<option value="BIANCA">BIANCA</option>
+<option value="BIANCA - 1° GRADO">BIANCA - 1° GRADO</option>
+<option value="BIANCA - 2° GRADO">BIANCA - 2° GRADO</option>
+<option value="BIANCA - 3° GRADO">BIANCA - 3° GRADO</option>
+<option value="BIANCA - 4° GRADO">BIANCA - 4° GRADO</option>
+<option value="BLU">BLU</option>
+<option value="BLU - 1° GRADO">BLU - 1° GRADO</option>
+<option value="BLU - 2° GRADO">BLU - 2° GRADO</option>
+<option value="BLU - 3° GRADO">BLU - 3° GRADO</option>
+<option value="BLU - 4° GRADO">BLU - 4° GRADO</option>
+<option value="VIOLA">VIOLA</option>
+<option value="VIOLA - 1° GRADO">VIOLA - 1° GRADO</option>
+<option value="VIOLA - 2° GRADO">VIOLA - 2° GRADO</option>
+<option value="VIOLA - 3° GRADO">VIOLA - 3° GRADO</option>
+<option value="VIOLA - 4° GRADO">VIOLA - 4° GRADO</option>
+<option value="MARRONE">MARRONE</option>
+<option value="MARRONE - 1° GRADO">MARRONE - 1° GRADO</option>
+<option value="MARRONE - 2° GRADO">MARRONE - 2° GRADO</option>
+<option value="MARRONE - 3° GRADO">MARRONE - 3° GRADO</option>
+<option value="MARRONE - 4° GRADO">MARRONE - 4° GRADO</option>
+<option value="NERA">NERA</option>
+<option value="NERA - 1° GRADO">NERA - 1° GRADO</option>
+<option value="NERA - 2° GRADO">NERA - 2° GRADO</option>
+<option value="NERA - 3° GRADO">NERA - 3° GRADO</option>
+<option value="NERA - 4° GRADO">NERA - 4° GRADO</option>
+<option value="NERA - 5° GRADO">NERA - 5° GRADO</option>
+<option value="NERA - 6° GRADO">NERA - 6° GRADO</option>
+`;
             
             let html = `
                <div style="background:#374151; padding:10px; border-radius:8px; margin-bottom:10px;">
@@ -1078,12 +1326,13 @@
         }
 
         const infoExtra = atleta.data ? `<small style="color:#666;">${atleta.giorno} ${atleta.data} - Ore: ${atleta.ora}</small>` : `<small style="color:#666;">Ore: ${atleta.orario}</small>`;
+        const badgePrimaLezione = atleta.primaLezione ? `<span style="background:#ef4444; color:white; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold; margin-left:5px; white-space:nowrap;">🔥 PRIMA LEZIONE!</span>` : '';
 
         li.innerHTML = `
           <div class="atleta-info-wrapper">
              ${avatarHtml}
              <div class="atleta-nome">
-               <strong>${atleta.nome} ${getBeltHtml(atleta.cintura)}</strong>
+               <strong style="display:flex; align-items:center; flex-wrap:wrap;">${atleta.nome} ${getBeltHtml(atleta.cintura)} ${badgePrimaLezione}</strong>
                ${infoExtra}
              </div>
           </div>
@@ -1102,12 +1351,13 @@
         }
 
         const infoExtra = `<small style="color:#666;">Ore: ${atleta.orario}</small>`;
+        const badgePrimaLezione = atleta.primaLezione ? `<span style="background:#ef4444; color:white; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold; margin-left:5px; white-space:nowrap;">🔥 PRIMA LEZIONE!</span>` : '';
 
         li.innerHTML = `
           <div class="atleta-info-wrapper">
              ${avatarHtml}
              <div class="atleta-nome">
-               <strong>${atleta.nome} ${getBeltHtml(atleta.cintura)}</strong>
+               <strong style="display:flex; align-items:center; flex-wrap:wrap;">${atleta.nome} ${getBeltHtml(atleta.cintura)} ${badgePrimaLezione}</strong>
                ${infoExtra}
              </div>
           </div>

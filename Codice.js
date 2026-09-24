@@ -48,12 +48,19 @@ function getAtleti() {
      }
      
      let cintura = r[3] ? r[3].toString().toUpperCase().trim() : "BIANCA";
+     let dataNascitaStr = "";
+     if (r[4] instanceof Date) {
+       dataNascitaStr = Utilities.formatDate(r[4], Session.getScriptTimeZone(), "dd/MM/yyyy");
+     } else if (r[4]) {
+       dataNascitaStr = r[4].toString().trim();
+     }
  
      atletiFormattati.push({
        nome: r[0].toString().toUpperCase().trim(),
        fotoUrl: foto,
        dataIscrizione: dataPulita,
-       cintura: cintura
+       cintura: cintura,
+       dataNascita: dataNascitaStr
      });
   }
   
@@ -110,6 +117,7 @@ function registraPresenza(nome) {
     
     const dataOdierna = new Date();
     const dataScritta = Utilities.formatDate(dataOdierna, Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
+    const dataConfronto = Utilities.formatDate(dataOdierna, Session.getScriptTimeZone(), "dd/MM/yyyy");
     
     const orario = Utilities.formatDate(dataOdierna, Session.getScriptTimeZone(), "HH:mm");
     const dati = foglioRegistro.getDataRange().getValues();
@@ -123,7 +131,7 @@ function registraPresenza(nome) {
         dataRiga = matchStr ? matchStr[0] : strDate.split(" ")[0];
       }
       
-      if (dataRiga === dataScritta && dati[i][3] === nome) {
+      if (dataRiga === dataConfronto && dati[i][3] === nome) {
         let orarioTrovato = dati[i][1];
         if (orarioTrovato instanceof Date) {
           orarioTrovato = Utilities.formatDate(orarioTrovato, Session.getScriptTimeZone(), "HH:mm");
@@ -155,24 +163,34 @@ function registraPresenza(nome) {
 
 function registraNuovoAtleta(nome, dataUriImmagine, cintura, dataNascita) {
   try {
-    // FIX: CONTROLLO ANTI-DUPLICATI
+    // FIX: CONTROLLO ANTI-DUPLICATI (Nome + Data di Nascita)
     const nomeDaVerificare = nome.toUpperCase().trim();
-    const atletiEsistenti = getNomiAtleti();
+    const atletiEsistentiCompleti = getAtleti();
     
+    // Prepara la data in formato testuale per il confronto
+    let dataNascitaScritta = "";
+    if (dataNascita) {
+       const parti = dataNascita.split("-");
+       if (parti.length === 3) dataNascitaScritta = `${parti[2]}/${parti[1]}/${parti[0]}`;
+    }
+
     // Separa il nome e il cognome per creare la variante invertita
     const partiNome = nomeDaVerificare.split(" ");
     let nomeInvertito = nomeDaVerificare; // Default uguale
     
     if (partiNome.length >= 2) {
-      // Prende l'ultima parola come nome/cognome e il resto prima, e li inverte.
-      // Funziona bene per "Mario Rossi" -> "Rossi Mario"
       const ultimo = partiNome.pop();
       const resto = partiNome.join(" ");
       nomeInvertito = ultimo + " " + resto;
     }
 
-    // Se il nome normale o la sua versione invertita esistono già nel database...
-    if (atletiEsistenti.includes(nomeDaVerificare) || atletiEsistenti.includes(nomeInvertito)) {
+    // Se esiste già un atleta con lo stesso nome (o invertito) E la stessa data di nascita...
+    const duplicato = atletiEsistentiCompleti.find(a => 
+      (a.nome === nomeDaVerificare || a.nome === nomeInvertito) && 
+      (a.dataNascita === dataNascitaScritta)
+    );
+
+    if (duplicato) {
       return { success: false, message: "ATTENZIONE: UTENTE GIÀ REGISTRATO!" };
     }
     // FINE BLOCCO ANTI-DUPLICATI
@@ -189,12 +207,6 @@ function registraNuovoAtleta(nome, dataUriImmagine, cintura, dataNascita) {
     const dataOdierna = new Date();
     const dataScritta = Utilities.formatDate(dataOdierna, Session.getScriptTimeZone(), "dd/MM/yyyy");
     const cinturaScritta = cintura ? cintura.toUpperCase() : "BIANCA";
-    
-    let dataNascitaScritta = "";
-    if (dataNascita) {
-       const parti = dataNascita.split("-");
-       if (parti.length === 3) dataNascitaScritta = `${parti[2]}/${parti[1]}/${parti[0]}`;
-    }
     
     ss.getSheetByName("ATLETI").appendRow([nome, file.getUrl(), dataScritta, cinturaScritta, dataNascitaScritta]);
     
@@ -220,6 +232,16 @@ function getDatiGiorno(dataSelezionataTesto) {
     const ss = SpreadsheetApp.openById(ID_FOGLIO);
     const datiRegistro = ss.getSheetByName("REGISTRO GREZZO").getDataRange().getValues();
     const atletiSalvati = getAtleti(); 
+    
+    const conteggioPresenze = {};
+    for (let i = 1; i < datiRegistro.length; i++) {
+        const esitoLoop = String(datiRegistro[i][4] || "");
+        const nomeLoop = String(datiRegistro[i][3] || "").trim().toUpperCase();
+        if (esitoLoop.startsWith("OK REGISTRAZIONE")) {
+            conteggioPresenze[nomeLoop] = (conteggioPresenze[nomeLoop] || 0) + 1;
+        }
+    }
+
     let partecipanti = [], furbetti = [], inAttesa = [];
     
     for (let i = 1; i < datiRegistro.length; i++) {
@@ -275,10 +297,18 @@ function getDatiGiorno(dataSelezionataTesto) {
         let foto = atletaTrovato ? atletaTrovato.fotoUrl : "";
         let cintura = atletaTrovato ? atletaTrovato.cintura : "BIANCA";
         
+        let presenzeAttuali = conteggioPresenze[nomeAtleta.toUpperCase()] || 0;
+        let isPrimaLezione = false;
+        if (esito.startsWith("OK REGISTRAZIONE")) {
+            isPrimaLezione = (presenzeAttuali === 1);
+        } else if (esito === "IN ATTESA") {
+            isPrimaLezione = (presenzeAttuali === 0);
+        }
+        
         if (esito === "IN ATTESA") {
-          inAttesa.push({nome: nomeAtleta, foto: foto, cintura: cintura, orario: orarioCheckin, riga: i + 1});
+          inAttesa.push({nome: nomeAtleta, foto: foto, cintura: cintura, orario: orarioCheckin, riga: i + 1, primaLezione: isPrimaLezione});
         } else if (esito.startsWith("OK REGISTRAZIONE")) {
-          partecipanti.push({nome: nomeAtleta, foto: foto, cintura: cintura, orario: orarioCheckin});
+          partecipanti.push({nome: nomeAtleta, foto: foto, cintura: cintura, orario: orarioCheckin, primaLezione: isPrimaLezione});
         } else {
           furbetti.push({nome: nomeAtleta, foto: foto, cintura: cintura, orario: orarioCheckin});
         }
@@ -433,6 +463,65 @@ function getStatisticheAnnuali(anno, mesi, nome) {
   return risultati;
 }
 
+function getClassifica(anno, mese) {
+  const ss = SpreadsheetApp.openById(ID_FOGLIO); 
+  const foglioRegistro = ss.getSheetByName('REGISTRO GREZZO');
+  
+  const datiRegistro = foglioRegistro.getDataRange().getValues();
+  const atletiSalvati = getAtleti();
+  
+  const dizionarioAtleti = {};
+  atletiSalvati.forEach(a => {
+    dizionarioAtleti[a.nome] = { foto: a.fotoUrl, cintura: a.cintura || "BIANCA", presenze: 0 };
+  });
+  
+  for (let i = 1; i < datiRegistro.length; i++) {
+    if (!datiRegistro[i][0]) continue;
+    
+    let valoreData = datiRegistro[i][0];
+    let dataObj;
+    if (valoreData instanceof Date) {
+      dataObj = valoreData;
+    } else {
+      let str = valoreData.toString().trim();
+      let parts = str.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+      if (parts) {
+        dataObj = new Date(parts[3], parts[2] - 1, parts[1]);
+      } else {
+        dataObj = new Date(str);
+      }
+    }
+    
+    if (isNaN(dataObj.getTime())) continue;
+    
+    if (dataObj.getFullYear() != anno) continue;
+    if (mese && dataObj.getMonth() + 1 != mese) continue;
+    
+    const nomeAtleta = datiRegistro[i][3] ? datiRegistro[i][3].toString().toUpperCase() : "";
+    const esito = datiRegistro[i][4];
+    
+    if (esito && esito.startsWith("OK REGISTRAZIONE") && dizionarioAtleti[nomeAtleta]) {
+      dizionarioAtleti[nomeAtleta].presenze++;
+    }
+  }
+  
+  const classifica = [];
+  for (const [nome, dati] of Object.entries(dizionarioAtleti)) {
+    if (dati.presenze > 0) {
+      classifica.push({
+        nome: nome,
+        foto: dati.foto,
+        cintura: dati.cintura,
+        presenze: dati.presenze
+      });
+    }
+  }
+  
+  classifica.sort((a, b) => b.presenze - a.presenze);
+  
+  return classifica;
+}
+
 
 
 function promuoviAtleti(promozioni) {
@@ -455,10 +544,17 @@ function promuoviAtleti(promozioni) {
       const note = promo.note ? promo.note.toUpperCase() : "";
       
       // 1. Salva nello Storico
-      foglioStorico.appendRow([nomeAtleta, dataOdierna, nuovaCintura, "PROMOZIONE", "", note]);
+      foglioStorico.appendRow([nomeAtleta, dataOdierna, nuovaCintura, "CONSEGUIMENTO", "", note]);
       
       // 2. Aggiorna cintura in ATLETI (colonna D, indice 3)
-      for (let i = 3; i < atletiDati.length; i++) {
+      let dataStart = 3;
+      for(let j=0; j<atletiDati.length; j++) {
+         if(atletiDati[j][0] && atletiDati[j][0].toString().trim().toUpperCase() === "NOME E COGNOME") {
+             dataStart = j + 1;
+             break;
+         }
+      }
+      for (let i = dataStart; i < atletiDati.length; i++) {
         if (atletiDati[i][0] && atletiDati[i][0].toString().toUpperCase().trim() === nomeAtleta) {
           foglioAtleti.getRange(i + 1, 4).setValue(nuovaCintura);
           break;
@@ -471,6 +567,75 @@ function promuoviAtleti(promozioni) {
     return { success: false, message: "Errore: " + e.message };
   }
 }
+
+function correggiCintura(nome, nuovaCintura) {
+  try {
+    const ss = SpreadsheetApp.openById(ID_FOGLIO);
+    const foglioAtleti = ss.getSheetByName("ATLETI");
+    const foglioStorico = ss.getSheetByName("STORICO CINTURE");
+    
+    if (!foglioAtleti || !foglioStorico) {
+      return { success: false, message: "Fogli non trovati" };
+    }
+    
+    const nomeDaCercare = nome.toUpperCase().trim();
+    const nuovaCinturaUpper = nuovaCintura.toUpperCase().trim();
+    
+    // 1. Aggiorna in ATLETI
+    const atletiDati = foglioAtleti.getDataRange().getValues();
+    let atletaTrovato = false;
+    for (let i = 3; i < atletiDati.length; i++) {
+      if (atletiDati[i][0] && atletiDati[i][0].toString().toUpperCase().trim() === nomeDaCercare) {
+        foglioAtleti.getRange(i + 1, 4).setValue(nuovaCinturaUpper);
+        atletaTrovato = true;
+        break;
+      }
+    }
+    
+    if (!atletaTrovato) {
+      return { success: false, message: "Atleta non trovato" };
+    }
+    
+    // 2. Modifica nello Storico (logica di ROLLBACK)
+    const storicoDati = foglioStorico.getDataRange().getValues();
+    const righeAtleta = [];
+    
+    for (let i = 3; i < storicoDati.length; i++) {
+      if (storicoDati[i][0] && storicoDati[i][0].toString().toUpperCase().trim() === nomeDaCercare) {
+        righeAtleta.push({
+           indexSheet: i + 1, 
+           cintura: storicoDati[i][2] ? storicoDati[i][2].toString().toUpperCase().trim() : ""
+        });
+      }
+    }
+    
+    if (righeAtleta.length > 0) {
+       let idxTrovata = -1;
+       for (let j = 0; j < righeAtleta.length; j++) {
+          if (righeAtleta[j].cintura === nuovaCinturaUpper) {
+             idxTrovata = j;
+             break;
+          }
+       }
+       
+       if (idxTrovata !== -1) {
+          // La cintura era già nello storico. Cancelliamo tutte le righe successive (partendo dall'ultima verso l'alto)
+          for (let j = righeAtleta.length - 1; j > idxTrovata; j--) {
+             foglioStorico.deleteRow(righeAtleta[j].indexSheet);
+          }
+       } else {
+          // La cintura NON è nello storico. Modifichiamo semplicemente l'ultima riga.
+          let ultimaRiga = righeAtleta[righeAtleta.length - 1];
+          foglioStorico.getRange(ultimaRiga.indexSheet, 3).setValue(nuovaCinturaUpper);
+       }
+    }
+    
+    return { success: true, message: "CINTURA CORRETTA CON SUCCESSO!" };
+  } catch (e) {
+    return { success: false, message: "Errore: " + e.message };
+  }
+}
+
 
 function getStoricoCinture() {
   const ss = SpreadsheetApp.openById(ID_FOGLIO);
@@ -731,7 +896,7 @@ function getDatiPromozioneAvanzati() {
       let tipoEvento = storicoDati[i][3] ? storicoDati[i][3].toString().toUpperCase().trim() : "";
       let lezioniExtra = parseInt(storicoDati[i][4]) || 0; 
       
-      if (tipoEvento === "PROMOZIONE" || tipoEvento === "ISCRIZIONE") {
+      if (tipoEvento === "PROMOZIONE" || tipoEvento === "ISCRIZIONE" || tipoEvento === "CONSEGUIMENTO") {
          if (!mapUltimaPromozione[nome] || dateObj >= mapUltimaPromozione[nome]) {
              mapUltimaPromozione[nome] = dateObj;
              mapLezioniExtra[nome] = 0; 
@@ -811,7 +976,7 @@ function getDatiPromozioneAvanzati() {
       
       let datiPres = mapPresenze[nome] || { tot: 0, ultimoAllenamento: null };
       let lezioniFatte = datiPres.tot;
-      let targetBase = targetCinture[cintura] || 100;
+      let targetBase = 50; // Gradi system: fixed 50 lessons per step
       let malus = mapLezioniExtra[nome] || 0;
       let targetTotale = targetBase + malus;
       
@@ -946,7 +1111,7 @@ function getAnagraficaAvanzata(nome) {
                let lezioniExtra = datiStorico[i][4] ? parseInt(datiStorico[i][4]) : 0;
                if(isNaN(lezioniExtra)) lezioniExtra = 0;
                
-                if (tipoEvento === "PROMOZIONE" || tipoEvento === "ISCRIZIONE") {
+                if (tipoEvento === "PROMOZIONE" || tipoEvento === "ISCRIZIONE" || tipoEvento === "CONSEGUIMENTO") {
                     if (dataObj >= dataUltimaPromozione) {
                         dataUltimaPromozione = dataObj;
                         malus = 0;
@@ -984,17 +1149,17 @@ function getAnagraficaAvanzata(nome) {
            if (nomeReg !== nomeUpper) continue;
            
            let dataReg = datiRegistro[i][0];
-           if (dataReg instanceof Date) {
-               if (dataReg >= dataUltimaPromozione) {
+           if (dataReg instanceof Date) { dateObj = dataReg; } else { let strDate = dataReg.toString().trim(); let matchStr = strDate.match(/(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/); if (matchStr) { let p = matchStr[0].split(/[/-]/); dateObj = new Date(p[2], p[1]-1, p[0]); } } if (dateObj) {
+               if (dateObj >= dataUltimaPromozione) {
                    presenze++;
-                   if (!ultimoAllenamento || dataReg > ultimoAllenamento) {
-                       ultimoAllenamento = dataReg;
+                   if (!ultimoAllenamento || dateObj > ultimoAllenamento) {
+                       ultimoAllenamento = dateObj;
                    }
                }
            }
        }
        
-       let targetBase = targetCinture[atletaInfo.cintura] || 100;
+       let targetBase = 50; // Gradi system: fixed 50 lessons per step
        let targetTotale = targetBase + malus;
        
        let strDataUltima = "--/--/----";
